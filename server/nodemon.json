@@ -1,0 +1,5 @@
+{
+  "watch": ["routes", "middleware", "socket", "server.js"],
+  "ignore": ["db/data.json", "*.log", "node_modules", "../client"],
+  "ext": "js,json"
+}

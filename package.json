@@ -1,0 +1,14 @@
+{
+  "name": "event-operations-system",
+  "version": "1.0.0",
+  "description": "A Hierarchical Event Operations and Communication Platform for Coordinating Event Management, Team Leaders, and Ground Workers",
+  "scripts": {
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "dev": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
