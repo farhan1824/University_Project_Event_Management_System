@@ -180,7 +180,147 @@ router.post('/:id/start', authMiddleware, async (req, res) => {
   }
 });
 
-// 1-Tap Action: COMPLETE Task
+// Worker: Submit Proof of Completion
+router.post('/:id/submit-proof', authMiddleware, async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
+    if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+
+    const { proofImage, proofNotes } = req.body;
+
+    task.status = 'PENDING_APPROVAL';
+    task.progress = 90;
+    task.proofImage = proofImage || null;
+    task.proofNotes = proofNotes || '';
+    task.submittedAt = new Date();
+    await task.save();
+
+    // Notify Department Team Leader
+    const dept = await Department.findById(task.departmentId);
+    if (dept && dept.leaderId) {
+      await Notification.create({
+        userId: dept.leaderId,
+        eventId: task.eventId,
+        taskId: task._id,
+        type: 'TASK_PROOF_SUBMITTED',
+        title: '📸 Task Proof Submitted',
+        message: `${req.user.name} submitted proof for "${task.title}". Please review and approve.`
+      });
+    }
+
+    await ActivityLog.create({
+      eventId: task.eventId,
+      userId: req.user._id,
+      userName: req.user.name,
+      action: 'TASK_PROOF_SUBMITTED',
+      details: `Submitted completion proof for "${task.title}"`
+    });
+
+    res.json({
+      success: true,
+      data: { ...task.toObject(), id: task._id.toString() },
+      message: 'Proof submitted for Team Leader approval'
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to submit proof' });
+  }
+});
+
+// Team Leader / Creator: APPROVE Task
+router.post('/:id/approve', authMiddleware, async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
+    if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+
+    task.status = 'COMPLETED';
+    task.progress = 100;
+    task.completedAt = new Date();
+    task.approvedBy = req.user._id;
+    await task.save();
+
+    // Auto resolve any open issues on this task
+    await Issue.updateMany(
+      { taskId: task._id, status: { $ne: 'RESOLVED' } },
+      { status: 'RESOLVED', resolvedAt: new Date(), resolvedBy: req.user.name }
+    );
+
+    // Notify Worker
+    if (task.assignedTo) {
+      await Notification.create({
+        userId: task.assignedTo,
+        eventId: task.eventId,
+        taskId: task._id,
+        type: 'TASK_APPROVED',
+        title: '✅ Task Approved',
+        message: `Your proof for "${task.title}" was approved by ${req.user.name}. Great job!`
+      });
+    }
+
+    await ActivityLog.create({
+      eventId: task.eventId,
+      userId: req.user._id,
+      userName: req.user.name,
+      action: 'TASK_APPROVED',
+      details: `Approved completion proof for task "${task.title}"`
+    });
+
+    res.json({
+      success: true,
+      data: { ...task.toObject(), id: task._id.toString() },
+      message: 'Task approved and marked completed'
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to approve task' });
+  }
+});
+
+// Team Leader / Creator: REJECT / Request Rework
+router.post('/:id/reject', authMiddleware, async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
+    if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+
+    const { feedbackNotes } = req.body;
+
+    task.status = 'IN_PROGRESS';
+    task.progress = 50;
+    task.feedbackNotes = feedbackNotes || 'Proof insufficient. Please redo and resubmit.';
+    await task.save();
+
+    // Notify Worker
+    if (task.assignedTo) {
+      await Notification.create({
+        userId: task.assignedTo,
+        eventId: task.eventId,
+        taskId: task._id,
+        type: 'TASK_REWORK_REQUESTED',
+        title: '⚠️ Rework Requested',
+        message: `${req.user.name} requested changes on "${task.title}": ${feedbackNotes || 'Please review and resubmit proof.'}`
+      });
+    }
+
+    await ActivityLog.create({
+      eventId: task.eventId,
+      userId: req.user._id,
+      userName: req.user.name,
+      action: 'TASK_REWORK_REQUESTED',
+      details: `Requested changes for task "${task.title}"`
+    });
+
+    res.json({
+      success: true,
+      data: { ...task.toObject(), id: task._id.toString() },
+      message: 'Rework requested. Worker notified.'
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to reject task' });
+  }
+});
+
+// Direct Action: COMPLETE Task (Fallback)
 router.post('/:id/complete', authMiddleware, async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);

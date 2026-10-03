@@ -103,126 +103,117 @@ export const AddWorkerModal = ({ isOpen, onClose, department, onMemberAdded }) =
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-base-200 border border-base-content/20 rounded-3xl w-full max-w-lg shadow-2xl p-5 sm:p-6 flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-modal p-5 sm:p-6 flex flex-col max-h-[88vh] animate-in zoom-in-95 duration-150 text-left">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-base-content/10">
+        <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
-            <div className="p-2.5 rounded-2xl bg-secondary/20 text-secondary">
+            <div className="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100">
               <UserPlus size={22} />
             </div>
             <div>
-              <h3 className="font-display font-bold text-base sm:text-lg text-base-content">
+              <h3 className="font-display font-bold text-base sm:text-lg text-slate-900">
                 Add Worker to {department.name}
               </h3>
-              <p className="text-xs text-base-content/60">
-                Search from already registered workers or invite a new field operator
+              <p className="text-xs text-slate-500">
+                Assign registered workers or invite new team members
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm">
+          <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm text-slate-400 hover:text-slate-800">
             <X size={18} />
           </button>
         </div>
 
-        {/* Tab Toggle */}
-        <div className="mt-3.5 flex items-center bg-base-100 p-1 rounded-xl border border-base-content/10 text-xs">
+        {/* Tab Selection */}
+        <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 mt-4 text-xs">
           <button
+            type="button"
             onClick={() => setActiveTab('search')}
-            className={`flex-1 py-1.5 rounded-lg font-bold transition-all flex items-center justify-center gap-1.5 ${
-              activeTab === 'search' ? 'bg-secondary text-secondary-content shadow-sm' : 'text-base-content/70 hover:bg-base-200'
+            className={`flex-1 py-1.5 font-bold rounded-xl transition-all ${
+              activeTab === 'search' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Search size={13} /> Registered Workers ({availableWorkers.length})
+            🔍 Choose from Registered Workers ({availableWorkers.length})
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('manual')}
-            className={`flex-1 py-1.5 rounded-lg font-bold transition-all flex items-center justify-center gap-1.5 ${
-              activeTab === 'manual' ? 'bg-secondary text-secondary-content shadow-sm' : 'text-base-content/70 hover:bg-base-200'
+            className={`flex-1 py-1.5 font-bold rounded-xl transition-all ${
+              activeTab === 'manual' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <UserPlus size={13} /> Manual Entry
+            ✍️ Quick Manual Add
           </button>
         </div>
 
-        {activeTab === 'search' ? (
+        {/* TAB 1: Search & Pick From Registered Users */}
+        {activeTab === 'search' && (
           <div className="flex-1 flex flex-col min-h-0 mt-3 space-y-3">
-            {/* Search Input */}
             <div className="relative">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50" />
+              <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search registered workers by name, email, or phone..."
+                placeholder="Search registered workers by name, phone, or email..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="input input-sm input-bordered w-full pl-9 bg-base-100 rounded-xl text-xs"
+                className="input input-sm w-full pl-9 bg-slate-50 focus:bg-white rounded-xl border-slate-200 focus:border-indigo-600 text-xs text-slate-900"
               />
             </div>
 
-            {/* List of Registered Workers */}
-            <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[200px] max-h-[300px]">
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 max-h-60">
               {loading ? (
-                <div className="flex justify-center items-center h-36">
-                  <span className="loading loading-spinner loading-md text-secondary"></span>
+                <div className="flex justify-center py-8">
+                  <span className="loading loading-spinner loading-sm text-primary"></span>
                 </div>
               ) : filteredWorkers.length === 0 ? (
-                <div className="text-center py-10 space-y-2">
-                  <AlertCircle size={30} className="mx-auto text-base-content/30" />
-                  <p className="text-xs text-base-content/60 font-medium">
-                    {registeredUsers.length === 0 
-                      ? 'No other users registered in the system yet.' 
-                      : availableWorkers.length === 0
-                        ? 'All registered workers are already in this department!'
-                        : 'No workers matched your search.'}
+                <div className="text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200 p-4 space-y-2">
+                  <p className="text-xs text-slate-500 font-medium">
+                    {search ? `No registered workers matching "${search}"` : 'No available workers to add.'}
                   </p>
-                  <p className="text-[11px] text-base-content/40">
-                    You can switch to <strong>"Manual Entry"</strong> tab to invite a worker before they sign up.
-                  </p>
+                  <button
+                    onClick={() => setActiveTab('manual')}
+                    className="btn btn-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold border-none shadow-xs"
+                  >
+                    + Add Worker Manually
+                  </button>
                 </div>
               ) : (
                 filteredWorkers.map((worker) => {
                   const isAdding = addingId === worker.id;
-
                   return (
                     <div
                       key={worker.id}
-                      className="p-3 rounded-2xl bg-base-100 border border-base-content/10 hover:border-secondary/40 flex items-center justify-between gap-3 shadow-sm transition-all"
+                      className="p-3 rounded-2xl bg-slate-50 hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-200 transition-all flex items-center justify-between gap-2 shadow-xs"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex items-center gap-2.5 min-w-0">
                         <div className="avatar">
-                          <div className="w-9 h-9 rounded-full bg-base-300 ring-1 ring-base-content/10">
-                            <img
-                              src={worker.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${worker.name}`}
-                              alt={worker.name}
-                            />
+                          <div className="w-8 h-8 rounded-full ring-1 ring-slate-200">
+                            <img src={worker.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${worker.name}`} alt={worker.name} />
                           </div>
                         </div>
                         <div className="min-w-0">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="font-bold text-xs text-base-content truncate">{worker.name}</span>
-                            <span className="badge badge-ghost badge-xs text-[9px] uppercase font-mono">
-                              {worker.role.replace('_', ' ')}
-                            </span>
+                          <div className="font-bold text-xs text-slate-900 truncate flex items-center gap-1.5">
+                            <span>{worker.name}</span>
+                            <span className="badge badge-xs bg-slate-200 text-slate-700 font-mono">WORKER</span>
                           </div>
-                          <div className="text-[11px] text-base-content/60 truncate mt-0.5">
-                            {worker.email}
-                          </div>
-                          <div className="text-[11px] font-mono text-primary flex items-center gap-1 mt-0.5">
-                            <Phone size={10} /> {worker.phone}
-                          </div>
+                          <div className="text-[11px] font-mono text-slate-500 truncate">{worker.phone || worker.email}</div>
                         </div>
                       </div>
 
                       <button
+                        type="button"
                         onClick={() => handleAddRegisteredWorker(worker)}
                         disabled={isAdding}
-                        className="btn btn-xs btn-secondary rounded-xl font-bold gap-1 shrink-0 shadow-sm"
+                        className="btn btn-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold gap-1 shrink-0 border-none shadow-xs touch-active"
                       >
                         {isAdding ? (
                           <span className="loading loading-spinner loading-xs"></span>
                         ) : (
-                          <><Plus size={12} /> Add to Team</>
+                          <>
+                            <Plus size={13} /> Add to Roster
+                          </>
                         )}
                       </button>
                     </div>
@@ -231,46 +222,48 @@ export const AddWorkerModal = ({ isOpen, onClose, department, onMemberAdded }) =
               )}
             </div>
           </div>
-        ) : (
-          /* Manual Entry Form */
-          <form onSubmit={handleManualSubmit} className="mt-3.5 space-y-3">
+        )}
+
+        {/* TAB 2: Quick Manual Add */}
+        {activeTab === 'manual' && (
+          <form onSubmit={handleManualSubmit} className="space-y-3 mt-3 flex-1 overflow-y-auto pr-1">
             <div>
-              <label className="label-text font-bold text-xs uppercase tracking-wider text-base-content/70 mb-1 block">
-                Worker Full Name *
+              <label className="label-text font-bold text-xs uppercase tracking-wider text-slate-600 mb-1 block">
+                Full Name *
               </label>
               <input
                 type="text"
                 required
-                placeholder="e.g. Jamal Uddin"
+                placeholder="e.g. Alex Johnson"
                 value={inviteName}
                 onChange={(e) => setInviteName(e.target.value)}
-                className="input input-bordered input-sm w-full bg-base-100 rounded-xl text-xs"
+                className="input input-sm input-bordered w-full bg-slate-50 focus:bg-white rounded-xl border-slate-200 focus:border-indigo-600 text-slate-900"
               />
             </div>
 
             <div>
-              <label className="label-text font-bold text-xs uppercase tracking-wider text-base-content/70 mb-1 block">
-                Phone Number (for emergency contact & WhatsApp)
+              <label className="label-text font-bold text-xs uppercase tracking-wider text-slate-600 mb-1 block">
+                Mobile Number
               </label>
               <input
                 type="tel"
-                placeholder="e.g. +880 1711-223344"
+                placeholder="+880 1700-000000"
                 value={invitePhone}
                 onChange={(e) => setInvitePhone(e.target.value)}
-                className="input input-bordered input-sm w-full bg-base-100 rounded-xl font-mono text-xs"
+                className="input input-sm input-bordered w-full bg-slate-50 focus:bg-white rounded-xl font-mono text-xs border-slate-200 focus:border-indigo-600 text-slate-900"
               />
             </div>
 
             <div>
-              <label className="label-text font-bold text-xs uppercase tracking-wider text-base-content/70 mb-1 block">
+              <label className="label-text font-bold text-xs uppercase tracking-wider text-slate-600 mb-1 block">
                 Email Address (Optional)
               </label>
               <input
                 type="email"
-                placeholder="worker@events.com"
+                placeholder="alex@events.com"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                className="input input-bordered input-sm w-full bg-base-100 rounded-xl text-xs"
+                className="input input-sm input-bordered w-full bg-slate-50 focus:bg-white rounded-xl text-xs border-slate-200 focus:border-indigo-600 text-slate-900"
               />
             </div>
 
@@ -278,19 +271,24 @@ export const AddWorkerModal = ({ isOpen, onClose, department, onMemberAdded }) =
               <button
                 type="submit"
                 disabled={manualSubmitting || !inviteName.trim()}
-                className="btn btn-sm btn-secondary w-full rounded-xl font-bold"
+                className="btn btn-sm bg-indigo-600 hover:bg-indigo-700 text-white w-full rounded-xl font-bold gap-1 border-none shadow-sm touch-active"
               >
-                {manualSubmitting ? <span className="loading loading-spinner loading-xs"></span> : <UserPlus size={15} />}
-                Add to Department Roster
+                {manualSubmitting ? (
+                  <span className="loading loading-spinner loading-xs"></span>
+                ) : (
+                  <>
+                    <UserPlus size={15} /> Add to Department Roster
+                  </>
+                )}
               </button>
             </div>
           </form>
         )}
 
         {/* Footer */}
-        <div className="flex justify-end pt-3 border-t border-base-content/10 mt-3">
-          <button type="button" onClick={onClose} className="btn btn-sm btn-ghost">
-            Close
+        <div className="flex justify-end pt-3 border-t border-slate-100 mt-3 pb-safe">
+          <button onClick={onClose} className="btn btn-sm btn-ghost text-slate-500">
+            Cancel
           </button>
         </div>
 

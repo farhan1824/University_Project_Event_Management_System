@@ -10,7 +10,12 @@ router.get('/issue/:issueId', authMiddleware, async (req, res) => {
     const messages = await IssueMessage.find({ issueId: req.params.issueId }).sort({ createdAt: 1 }).lean();
     res.json({
       success: true,
-      data: messages.map(m => ({ ...m, id: m._id.toString() }))
+      data: messages.map(m => ({ 
+        ...m, 
+        id: m._id.toString(),
+        _id: m._id.toString(),
+        issueId: m.issueId.toString()
+      }))
     });
   } catch (err) {
     console.error(err);
@@ -37,9 +42,22 @@ router.post('/issue/:issueId', authMiddleware, async (req, res) => {
       message: message.trim()
     });
 
+    const formattedMsg = { 
+      ...newMsg.toObject(), 
+      id: newMsg._id.toString(),
+      _id: newMsg._id.toString(),
+      issueId: issue._id.toString(),
+      createdAt: newMsg.createdAt ? newMsg.createdAt.toISOString() : new Date().toISOString()
+    };
+
+    if (req.io) {
+      req.io.to(`issue_${issue._id.toString()}`).emit('new_issue_message', formattedMsg);
+      req.io.to(`issue_${issue._id.toString()}`).emit('receive_issue_message', formattedMsg);
+    }
+
     res.status(201).json({
       success: true,
-      data: { ...newMsg.toObject(), id: newMsg._id.toString() }
+      data: formattedMsg
     });
   } catch (err) {
     console.error(err);

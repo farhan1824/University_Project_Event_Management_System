@@ -69,62 +69,59 @@ export const UserRoleManagementModal = ({ isOpen, onClose }) => {
   );
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-base-200 border border-base-content/20 rounded-3xl w-full max-w-3xl shadow-2xl p-5 sm:p-6 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-3xl shadow-modal p-5 sm:p-6 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150 text-left">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-base-content/10">
+        <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
-            <div className="p-2.5 rounded-2xl bg-primary/20 text-primary">
+            <div className="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100">
               <Shield size={22} />
             </div>
             <div>
-              <h3 className="font-display font-bold text-lg text-base-content">
+              <h3 className="font-display font-bold text-base sm:text-lg text-slate-900">
                 User Management & Role Promotion
               </h3>
-              <p className="text-xs text-base-content/60">
+              <p className="text-xs text-slate-500">
                 Promote normal workers to Team Leaders and assign them to departments
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm">
+          <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm text-slate-400 hover:text-slate-800">
             <X size={18} />
           </button>
         </div>
 
         {/* Action message */}
         {actionMessage && (
-          <div className="mt-3 p-2.5 rounded-xl bg-success/20 border border-success/30 text-success text-xs font-semibold flex items-center gap-2">
+          <div className="mt-3 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
             <Check size={16} />
             <span>{actionMessage}</span>
           </div>
         )}
 
         {/* Search */}
-        <div className="mt-4 flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50" />
-            <input
-              type="text"
-              placeholder="Search user by name, email, or role..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="input input-sm input-bordered w-full pl-9 bg-base-100 rounded-xl text-xs"
-            />
-          </div>
-          <span className="text-xs text-base-content/50 font-mono">
-            {filteredUsers.length} Users
-          </span>
+        <div className="mt-4 relative">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search users by name, email, or role..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="input input-sm sm:input-md w-full pl-9 bg-slate-50 focus:bg-white rounded-xl border-slate-200 focus:border-indigo-600 text-xs sm:text-sm text-slate-900"
+          />
         </div>
 
-        {/* Users Table / List */}
-        <div className="flex-1 overflow-y-auto mt-3 space-y-2.5 pr-1">
+        {/* User List */}
+        <div className="mt-4 flex-1 overflow-y-auto space-y-2.5 pr-1">
           {loading ? (
-            <div className="flex justify-center items-center h-48">
-              <span className="loading loading-spinner loading-md text-primary"></span>
+            <div className="flex justify-center py-12">
+              <span className="loading loading-spinner text-primary"></span>
             </div>
           ) : filteredUsers.length === 0 ? (
-            <p className="text-xs text-base-content/50 py-12 text-center">No users found.</p>
+            <div className="text-center py-12 text-xs text-slate-400">
+              No registered users found.
+            </div>
           ) : (
             filteredUsers.map((u) => {
               const isCreator = u.role === 'EVENT_CREATOR';
@@ -134,100 +131,59 @@ export const UserRoleManagementModal = ({ isOpen, onClose }) => {
               return (
                 <div
                   key={u.id}
-                  className="p-3.5 rounded-2xl bg-base-100 border border-base-content/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm hover:border-base-content/25 transition-all"
+                  className="p-3.5 rounded-2xl bg-slate-50/70 hover:bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
                 >
-                  {/* User Profile */}
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="avatar">
-                      <div className="w-10 h-10 rounded-full bg-base-300 ring-1 ring-base-content/10">
+                      <div className="w-10 h-10 rounded-full ring-2 ring-indigo-100">
                         <img src={u.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.name}`} alt={u.name} />
                       </div>
                     </div>
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-sm text-base-content truncate">{u.name}</span>
-                        <span className={`badge badge-xs font-bold ${
-                          isCreator ? 'badge-primary' : isLeader ? 'badge-secondary' : 'badge-ghost'
+                      <div className="font-bold text-sm text-slate-900 truncate flex items-center gap-2">
+                        <span>{u.name}</span>
+                        <span className={`badge badge-xs font-mono font-bold ${
+                          isCreator ? 'bg-purple-100 text-purple-800' : isLeader ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-200 text-slate-700'
                         }`}>
                           {u.role.replace('_', ' ')}
                         </span>
                       </div>
-                      <div className="text-xs text-base-content/60 truncate flex items-center gap-2 mt-0.5">
-                        <span>{u.email}</span>
-                        <span className="font-mono text-base-content/40">•</span>
-                        <span className="font-mono flex items-center gap-0.5 text-primary">
-                          <Phone size={11} /> {u.phone}
-                        </span>
-                      </div>
-
-                      {/* Department Tags */}
-                      {isLeader && u.leadingDepartments && u.leadingDepartments.length > 0 && (
-                        <div className="flex items-center gap-1 flex-wrap mt-1.5">
-                          <span className="text-[10px] uppercase font-bold text-secondary">Leads:</span>
-                          {u.leadingDepartments.map(d => (
-                            <span key={d.id} className="badge badge-xs badge-outline border-secondary/40 text-secondary text-[10px]">
-                              {d.name}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                      <div className="text-xs text-slate-500 truncate mt-0.5">{u.email}</div>
+                      <div className="text-[11px] text-slate-400 font-mono mt-0.5">{u.phone || 'No phone registered'}</div>
                     </div>
                   </div>
 
-                  {/* Promotion / Department Assignment Actions */}
-                  <div className="flex items-center gap-1.5 shrink-0 flex-wrap sm:justify-end">
-                    {/* Promote to Team Leader */}
+                  {/* Actions (Promote / Demote / Assign to Dept) */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     {isWorker && (
                       <button
                         onClick={() => handleRoleChange(u.id, 'TEAM_LEADER')}
-                        className="btn btn-xs btn-secondary font-bold gap-1 rounded-xl shadow-sm"
-                        title="Promote worker to Team Leader"
+                        className="btn btn-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl font-bold gap-1 shadow-xs"
                       >
                         <ArrowUpRight size={13} /> Promote to Leader
                       </button>
                     )}
 
-                    {/* Assign Departments to Team Leader */}
                     {isLeader && (
-                      <div className="dropdown dropdown-end">
-                        <label tabIndex={0} className="btn btn-xs btn-outline border-secondary/40 hover:bg-secondary/10 text-secondary gap-1 rounded-xl">
+                      <>
+                        <button
+                          onClick={() => setSelectedUserForDept(u)}
+                          className="btn btn-xs bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-xl font-bold gap-1 shadow-xs"
+                        >
                           <Layers size={13} /> Assign Dept
-                        </label>
-                        <ul tabIndex={0} className="dropdown-content z-50 menu p-2 shadow-2xl bg-base-200 border border-base-content/15 rounded-2xl w-60 mt-1">
-                          <li className="menu-title text-[10px] font-bold uppercase text-base-content/60">
-                            Assign {u.name.split(' ')[0]} to Department:
-                          </li>
-                          {departments.map((dept) => (
-                            <li key={dept.id}>
-                              <button
-                                onClick={() => handleAssignLeaderToDept(dept.id, u.id)}
-                                className={`text-xs flex items-center justify-between ${
-                                  dept.leaderId === u.id ? 'font-bold text-secondary bg-secondary/10' : ''
-                                }`}
-                              >
-                                <span>{dept.name}</span>
-                                {dept.leaderId === u.id && <Check size={13} />}
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Demote back to Worker */}
-                    {isLeader && (
-                      <button
-                        onClick={() => handleRoleChange(u.id, 'WORKER')}
-                        className="btn btn-xs btn-ghost text-base-content/60 hover:text-warning gap-1"
-                        title="Demote back to Ground Worker"
-                      >
-                        <ArrowDownRight size={13} /> Demote
-                      </button>
+                        </button>
+                        <button
+                          onClick={() => handleRoleChange(u.id, 'WORKER')}
+                          className="btn btn-xs bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold gap-1"
+                        >
+                          <ArrowDownRight size={13} /> Demote to Worker
+                        </button>
+                      </>
                     )}
 
                     {isCreator && (
-                      <span className="badge badge-sm badge-primary badge-outline font-mono text-[10px]">
-                        Primary Organizer
+                      <span className="text-[11px] text-purple-700 font-bold px-2 py-1 bg-purple-50 rounded-lg border border-purple-200">
+                        👑 System Admin
                       </span>
                     )}
                   </div>
@@ -237,9 +193,40 @@ export const UserRoleManagementModal = ({ isOpen, onClose }) => {
           )}
         </div>
 
-        <div className="flex justify-end pt-3 border-t border-base-content/10 mt-3">
-          <button type="button" onClick={onClose} className="btn btn-sm btn-ghost">
-            Close
+        {/* Department Assignment Sub-Modal */}
+        {selectedUserForDept && (
+          <div className="mt-4 p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 space-y-3 animate-in fade-in">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-xs text-indigo-900">
+                Assign <strong>{selectedUserForDept.name}</strong> as Leader of:
+              </span>
+              <button
+                onClick={() => setSelectedUserForDept(null)}
+                className="btn btn-ghost btn-circle btn-xs text-slate-400 hover:text-slate-700"
+              >
+                <X size={14} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {departments.map((dept) => (
+                <button
+                  key={dept.id}
+                  onClick={() => handleAssignLeaderToDept(dept.id, selectedUserForDept.id)}
+                  className="btn btn-sm bg-white hover:bg-indigo-600 hover:text-white border border-indigo-200 text-slate-800 text-xs font-semibold justify-between rounded-xl shadow-xs"
+                >
+                  <span className="truncate">{dept.name}</span>
+                  <Check size={14} />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="flex justify-end pt-3.5 border-t border-slate-100 mt-3 pb-safe">
+          <button onClick={onClose} className="btn btn-sm btn-ghost text-slate-500">
+            Done
           </button>
         </div>
 

@@ -63,9 +63,9 @@ async function calculateEventHealth(eventId) {
     };
   });
 
-  // Critical & Escalated Issues
+  // Critical & Escalated Issues (Only issues escalated by Team Leaders)
   const criticalIssues = allIssues
-    .filter(i => i.status !== 'RESOLVED' && (i.priority === 'CRITICAL' || i.isEscalated))
+    .filter(i => i.status !== 'RESOLVED' && i.isEscalated === true)
     .map(i => {
       const dept = departments.find(d => d._id.toString() === i.departmentId.toString());
       return {

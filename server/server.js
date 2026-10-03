@@ -19,7 +19,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id']
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ limit: '25mb', extended: true }));
 
 // Setup Socket.io for Real-time chat & live status sync
 const io = new Server(server, {

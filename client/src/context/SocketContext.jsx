@@ -15,20 +15,27 @@ export const SocketProvider = ({ children }) => {
     // Connect to backend Socket.io server
     const socketInstance = io(window.location.origin, {
       transports: ['websocket', 'polling'],
-      reconnectionAttempts: 10,
+      reconnectionAttempts: 25,
       reconnectionDelay: 1000
     });
 
     socketInstance.on('connect', () => {
+      console.log(`[SocketClient] Connected with ID: ${socketInstance.id}`);
       setIsConnected(true);
     });
 
     socketInstance.on('disconnect', () => {
+      console.log('[SocketClient] Disconnected from server');
       setIsConnected(false);
     });
 
     // Listen for incoming alerts
     socketInstance.on('issue_activity_alert', (alert) => {
+      setLiveAlerts((prev) => [alert, ...prev.slice(0, 9)]);
+      playNotificationSound();
+    });
+
+    socketInstance.on('user_mentioned_alert', (alert) => {
       setLiveAlerts((prev) => [alert, ...prev.slice(0, 9)]);
       playNotificationSound();
     });
@@ -39,6 +46,17 @@ export const SocketProvider = ({ children }) => {
       socketInstance.disconnect();
     };
   }, []);
+
+  // Register user personal channel whenever socket or user changes
+  useEffect(() => {
+    if (socket && isConnected && user && user.id) {
+      socket.emit('join_event', {
+        eventId: null,
+        userId: user.id,
+        role: user.role
+      });
+    }
+  }, [socket, isConnected, user]);
 
   // Web Audio subtle ping sound effect
   const playNotificationSound = () => {

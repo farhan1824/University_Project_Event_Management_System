@@ -42,38 +42,38 @@ export const CollectPhoneModal = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-base-200 border border-base-content/20 rounded-3xl w-full max-w-md shadow-2xl p-6 animate-in zoom-in-95 duration-200 text-left space-y-4">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-md shadow-modal p-6 sm:p-7 animate-in zoom-in-95 duration-200 text-left space-y-4">
         
         {/* Header Icon */}
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-2xl bg-primary/20 text-primary shadow-inner">
+          <div className="p-3 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100">
             <Phone size={24} />
           </div>
           <div>
             <span className="badge badge-primary badge-xs font-mono uppercase font-bold tracking-wider mb-1">
               Required Profile Setup
             </span>
-            <h3 className="font-display font-black text-lg sm:text-xl text-base-content">
+            <h3 className="font-display font-black text-lg sm:text-xl text-slate-900">
               Enter Your Phone Number
             </h3>
           </div>
         </div>
 
-        <p className="text-xs text-base-content/70 leading-relaxed">
-          Welcome, <strong>{user.name}</strong>! For on-ground field coordination, emergency task notifications, and direct WhatsApp escalation, please provide your active phone number.
+        <p className="text-xs text-slate-600 leading-relaxed">
+          Welcome, <strong>{user.name}</strong>! For on-ground event coordination, task alerts, and direct WhatsApp communication, please provide your active phone number.
         </p>
 
         {error && (
-          <div className="p-2.5 rounded-xl bg-error/20 border border-error/30 text-error text-xs font-semibold">
+          <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-1">
           <div>
-            <label className="label-text font-bold text-xs uppercase tracking-wider text-base-content/70 mb-1.5 flex items-center gap-1.5">
-              <Phone size={13} /> Active Mobile Number *
+            <label className="label-text font-bold text-xs uppercase tracking-wider text-slate-700 mb-1.5 flex items-center gap-1.5">
+              <Phone size={13} className="text-primary" /> Active Mobile Number *
             </label>
             <input
               type="tel"
@@ -85,9 +85,9 @@ export const CollectPhoneModal = () => {
                 setPhone(e.target.value);
                 if (error) setError(null);
               }}
-              className="input input-bordered w-full bg-base-100 rounded-2xl font-mono text-sm focus:border-primary"
+              className="input input-bordered w-full bg-slate-50 focus:bg-white rounded-2xl font-mono text-sm border-slate-200 focus:border-indigo-600 text-slate-900"
             />
-            <span className="text-[11px] text-base-content/50 block mt-1">
+            <span className="text-[11px] text-slate-400 block mt-1">
               Your phone will be visible to your Team Leader & Organizer for direct coordination.
             </span>
           </div>
@@ -95,13 +95,14 @@ export const CollectPhoneModal = () => {
           <button
             type="submit"
             disabled={submitting || !phone.trim()}
-            className="btn btn-primary w-full rounded-2xl font-bold gap-2 shadow-lg shadow-primary/20"
+            className="btn bg-indigo-600 hover:bg-indigo-700 text-white w-full rounded-2xl font-bold gap-2 shadow-md shadow-indigo-600/20 border-none touch-active"
           >
             {submitting ? (
-              <span className="loading loading-spinner loading-sm"></span>
+              <span className="loading loading-spinner loading-xs"></span>
             ) : (
               <>
-                <span>Save & Continue to Dashboard</span>
+                <CheckCircle2 size={16} />
+                <span>Save Phone & Continue</span>
                 <ArrowRight size={16} />
               </>
             )}

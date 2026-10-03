@@ -3,7 +3,7 @@ import { departmentAPI, authAPI } from '../services/api';
 import { useEvent } from '../context/EventContext';
 import { Layers, User, X, Plus } from 'lucide-react';
 
-const PALETTE = ['#f59e0b', '#3b82f6', '#ec4899', '#10b981', '#ef4444', '#8b5cf6', '#06b6d4', '#14b8a6'];
+const PALETTE = ['#4f46e5', '#7c3aed', '#0284c7', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4'];
 
 export const AddDepartmentModal = ({ isOpen, onClose, onSuccess }) => {
   const { selectedEventId, refreshEventData } = useEvent();
@@ -58,103 +58,110 @@ export const AddDepartmentModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-base-200 border border-base-content/20 rounded-2xl w-full max-w-md shadow-2xl p-5 animate-in fade-in zoom-in-95 duration-150">
-        <div className="flex items-center justify-between pb-3 border-b border-base-content/10">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-secondary/20 text-secondary">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-md shadow-modal p-5 sm:p-6 animate-in zoom-in-95 duration-150 text-left">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100">
               <Layers size={22} />
             </div>
             <div>
-              <h3 className="font-display font-bold text-lg text-base-content">Add Department</h3>
-              <p className="text-xs text-base-content/60">Configure department and assign Team Leader</p>
+              <h3 className="font-display font-bold text-base sm:text-lg text-slate-900">Add Department</h3>
+              <p className="text-xs text-slate-500">Configure department and assign Team Leader</p>
             </div>
           </div>
-          <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm">
+          <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm text-slate-400 hover:text-slate-800">
             <X size={18} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-3.5">
           <div>
-            <label className="label-text font-bold text-xs uppercase tracking-wider text-base-content/70 mb-1 block">
-              Department Name
+            <label className="label-text font-bold text-xs uppercase tracking-wider text-slate-600 mb-1 block">
+              Department Name *
             </label>
             <input
               type="text"
               required
-              placeholder="e.g. Media & Photography, Stage Management, Security"
+              placeholder="e.g. Media & Photography, Stage Operations, Security"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="input input-bordered input-sm w-full bg-base-100 rounded-xl"
+              className="input input-bordered input-sm sm:input-md w-full bg-slate-50 focus:bg-white rounded-xl border-slate-200 focus:border-indigo-600 text-slate-900"
             />
           </div>
 
           <div>
-            <label className="label-text font-bold text-xs uppercase tracking-wider text-base-content/70 mb-1 flex items-center gap-1">
-              <User size={13} /> Assign Team Leader
+            <label className="label-text font-bold text-xs uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-1">
+              <User size={13} className="text-primary" /> Assign Team Leader
             </label>
             <select
               value={leaderId}
               onChange={(e) => setLeaderId(e.target.value)}
-              className="select select-bordered select-sm w-full bg-base-100 rounded-xl"
+              className="select select-bordered select-sm sm:select-md w-full bg-slate-50 focus:bg-white rounded-xl border-slate-200 focus:border-indigo-600 text-slate-900 text-xs sm:text-sm"
             >
-              <option value="">No Leader Assigned Yet</option>
+              <option value="">-- Unassigned (Assign later) --</option>
               {leaders.map((l) => (
-                <option key={l.id} value={l.id}>{l.name} ({l.email})</option>
+                <option key={l.id} value={l.id}>
+                  {l.name} ({l.email})
+                </option>
               ))}
             </select>
-            <span className="text-[11px] text-base-content/50 mt-1 block">
-              * Note: A Team Leader can manage multiple departments simultaneously.
-            </span>
           </div>
 
           <div>
-            <label className="label-text font-bold text-xs uppercase tracking-wider text-base-content/70 mb-1 block">
-              Color Tag
+            <label className="label-text font-bold text-xs uppercase tracking-wider text-slate-600 mb-1 block">
+              Department Color Theme
             </label>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2 pt-1">
               {PALETTE.map((c) => (
                 <button
-                  type="button"
                   key={c}
+                  type="button"
                   onClick={() => setColorCode(c)}
-                  className={`w-7 h-7 rounded-full border-2 transition-transform ${
-                    colorCode === c ? 'scale-110 border-white ring-2 ring-primary/40' : 'border-transparent opacity-75'
+                  className={`w-7 h-7 rounded-full transition-transform ${
+                    colorCode === c ? 'scale-125 ring-2 ring-offset-2 ring-primary' : 'hover:scale-110'
                   }`}
                   style={{ backgroundColor: c }}
-                />
+                ></button>
               ))}
             </div>
           </div>
 
           <div>
-            <label className="label-text font-bold text-xs uppercase tracking-wider text-base-content/70 mb-1 block">
-              Description / Scope
+            <label className="label-text font-bold text-xs uppercase tracking-wider text-slate-600 mb-1 block">
+              Description (Optional)
             </label>
             <textarea
               rows={2}
-              placeholder="Describe what operations this department executes..."
+              placeholder="Roles and responsibilities of this department..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="textarea textarea-bordered w-full bg-base-100 rounded-xl text-xs"
+              className="textarea textarea-bordered w-full bg-slate-50 focus:bg-white rounded-xl text-xs border-slate-200 focus:border-indigo-600 text-slate-900"
             ></textarea>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-base-content/10">
-            <button type="button" onClick={onClose} className="btn btn-sm btn-ghost">
+          {/* Actions */}
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 pb-safe">
+            <button type="button" onClick={onClose} className="btn btn-sm btn-ghost text-slate-500">
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting || !name.trim()}
-              className="btn btn-sm btn-secondary rounded-xl font-bold px-5"
+              className="btn btn-sm bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md shadow-indigo-600/20 px-4 border-none touch-active"
             >
-              {submitting ? <span className="loading loading-spinner loading-xs"></span> : <Plus size={16} />}
-              Create Department
+              {submitting ? (
+                <span className="loading loading-spinner loading-xs"></span>
+              ) : (
+                'Create Department'
+              )}
             </button>
           </div>
+
         </form>
+
       </div>
     </div>
   );

@@ -1,8 +1,14 @@
+# ==========================================
 # Dependencies
+# ==========================================
 node_modules/
 **/node_modules/
+.pnp
+.pnp.js
 
-# Environment Variables (Keep credentials secret!)
+# ==========================================
+# Environment Variables & Secrets (Keep confidential!)
+# ==========================================
 .env
 .env.*
 !.env.example
@@ -10,27 +16,66 @@ node_modules/
 **/.env.*
 !**/.env.example
 *.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
 
+# ==========================================
 # Production Build Artifacts
+# ==========================================
 dist/
 **/dist/
+dist-ssr/
+**/dist-ssr/
 build/
 **/build/
 out/
 .next/
+*.tsbuildinfo
 
-# Logs & Runtime Data
+# ==========================================
+# Logs, Diagnostics & Runtime Data
+# ==========================================
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+logs/
+*.pid
+*.seed
+*.pid.lock
 
-# OS & Editor Files
+# ==========================================
+# Temporary Files, Caches & Coverage
+# ==========================================
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+.stylelintcache
+coverage/
+.nyc_output/
+tmp/
+temp/
+
+# ==========================================
+# IDE, Editor & OS Files
+# ==========================================
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
-.vscode/
+[Dd]esktop.ini
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
 !.vscode/extensions.json
 .idea/
 *.suo
@@ -39,9 +84,8 @@ Thumbs.db
 *.sln
 *.sw?
 
-# Temporary & Cache
-.cache/
-.parcel-cache/
-.turbo/
-tmp/
-temp/
+# ==========================================
+# AI Agent Workspaces & Local Artifacts
+# ==========================================
+.agents/
+.gemini/

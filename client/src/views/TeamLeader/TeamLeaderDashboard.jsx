@@ -6,6 +6,7 @@ import { departmentAPI, taskAPI, issueAPI } from '../../services/api';
 import CreateTaskModal from '../../components/CreateTaskModal';
 import AddWorkerModal from '../../components/AddWorkerModal';
 import AssignTaskModal from '../../components/AssignTaskModal';
+import ReviewTaskProofModal from '../../components/ReviewTaskProofModal';
 import { 
   Layers, 
   Users, 
@@ -17,11 +18,11 @@ import {
   Plus, 
   MessageSquare, 
   ExternalLink, 
-  UserPlus,
-  ArrowUpRight,
-  Filter,
-  UserCheck,
-  UserX
+  UserPlus, 
+  UserCheck, 
+  UserX,
+  Camera,
+  Sparkles
 } from 'lucide-react';
 
 export const TeamLeaderDashboard = () => {
@@ -41,6 +42,7 @@ export const TeamLeaderDashboard = () => {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isWorkerModalOpen, setIsWorkerModalOpen] = useState(false);
   const [taskToAssign, setTaskToAssign] = useState(null);
+  const [selectedTaskForReview, setSelectedTaskForReview] = useState(null);
 
   // 1. Fetch departments assigned to this Team Leader for the active event
   const loadMyDepartments = async () => {
@@ -132,6 +134,7 @@ export const TeamLeaderDashboard = () => {
 
   // Filter tasks
   const filteredTasks = tasks.filter(t => {
+    if (taskFilter === 'PENDING_APPROVAL') return t.status === 'PENDING_APPROVAL';
     if (taskFilter === 'COMPLETED') return t.status === 'COMPLETED';
     if (taskFilter === 'IN_PROGRESS') return t.status === 'IN_PROGRESS';
     if (taskFilter === 'BLOCKED') return t.status === 'BLOCKED';
@@ -140,64 +143,68 @@ export const TeamLeaderDashboard = () => {
   });
 
   const selectedDept = myDepartments.find(d => d.id === selectedDeptId);
+  const pendingApprovalCount = tasks.filter(t => t.status === 'PENDING_APPROVAL').length;
+  const openIssuesCount = issues.filter(i => i.status !== 'RESOLVED').length;
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-24 text-left">
       
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-base-200 to-base-300 border border-base-content/10 rounded-3xl p-5 sm:p-7 shadow-xl">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Header Banner - Team Leader Command Hub */}
+      <div className="bg-gradient-to-br from-indigo-700 via-indigo-800 to-purple-900 text-white rounded-3xl p-5 sm:p-7 shadow-xl shadow-indigo-700/15 relative overflow-hidden">
+        <div className="absolute -right-8 -bottom-8 w-40 h-40 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="badge badge-secondary badge-sm uppercase font-mono font-bold tracking-wider">
-                👔 Team Leader Station
+              <span className="bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-mono font-bold tracking-wider uppercase text-white/95">
+                👔 Department Leader
               </span>
-              <span className="text-xs text-base-content/60 font-medium">
-                {myDepartments.length} Assigned Department(s)
+              <span className="text-xs font-mono font-bold text-indigo-200 bg-black/20 px-2.5 py-0.5 rounded-full">
+                {myDepartments.length} Department(s)
               </span>
             </div>
-            <h1 className="font-display font-black text-2xl sm:text-3xl text-base-content mt-1">
+            <h1 className="font-display font-black text-2xl sm:text-3xl text-white mt-2 leading-tight">
               {user.name}
             </h1>
-            <p className="text-xs sm:text-sm text-base-content/70">
-              Manage department rosters, delegate operational tasks, and triage field problem escalations.
+            <p className="text-xs sm:text-sm text-indigo-100/90 mt-1 max-w-xl">
+              Coordinate team rosters, delegate tasks, inspect worker completion photo proofs, and triage ground problems.
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap pt-2 md:pt-0">
             <button
               onClick={() => setIsTaskModalOpen(true)}
-              className="btn btn-sm btn-primary rounded-xl font-bold gap-1.5 shadow-md shadow-primary/20"
+              className="btn btn-sm bg-white text-indigo-700 hover:bg-slate-100 rounded-xl font-bold gap-1.5 shadow-md border-none touch-active"
             >
-              <Plus size={15} /> Create Task
+              <Plus size={16} /> Create Task
             </button>
             <button
               onClick={() => setIsWorkerModalOpen(true)}
-              className="btn btn-sm btn-secondary rounded-xl font-bold gap-1.5 shadow-md shadow-secondary/20"
+              className="btn btn-sm bg-indigo-500/40 hover:bg-indigo-500/60 text-white border border-white/20 rounded-xl font-bold gap-1.5 shadow-sm touch-active"
             >
-              <UserPlus size={15} /> Add Worker
+              <UserPlus size={16} /> Add Worker
             </button>
           </div>
         </div>
 
-        {/* Multi-Department Tabs */}
-        <div className="mt-5 flex items-center gap-2 overflow-x-auto pb-1">
+        {/* Multi-Department Navigation Tabs */}
+        <div className="mt-6 flex items-center gap-2 overflow-x-auto pb-1 relative z-10">
           {myDepartments.length === 0 ? (
-            <p className="text-xs text-base-content/50 italic">No departments assigned to you in this event.</p>
+            <p className="text-xs text-indigo-200 italic">No departments assigned to you in this event.</p>
           ) : (
             myDepartments.map((dept) => (
               <button
                 key={dept.id}
                 onClick={() => setSelectedDeptId(dept.id)}
-                className={`btn btn-sm rounded-xl font-bold transition-all gap-2 ${
+                className={`btn btn-sm rounded-2xl font-bold transition-all gap-2 border-none touch-active ${
                   selectedDeptId === dept.id
-                    ? 'btn-secondary shadow-lg shadow-secondary/20'
-                    : 'btn-ghost bg-base-100/60 hover:bg-base-100 border border-base-content/10'
+                    ? 'bg-white text-indigo-900 shadow-md shadow-black/20'
+                    : 'bg-white/10 hover:bg-white/20 text-white border border-white/10'
                 }`}
               >
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: dept.colorCode }}></span>
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: dept.colorCode || '#4f46e5' }}></span>
                 <span>{dept.name}</span>
-                <span className="badge badge-xs badge-neutral">{dept.progress}%</span>
+                <span className="badge badge-xs bg-black/20 text-white border-none font-bold">{dept.progress}%</span>
               </button>
             ))
           )}
@@ -211,27 +218,27 @@ export const TeamLeaderDashboard = () => {
           <div className="lg:col-span-2 space-y-6">
             
             {/* Problem Triage Hub */}
-            <div className="bg-base-200/90 border border-base-content/10 rounded-3xl p-5 shadow-lg">
-              <div className="flex items-center justify-between pb-3 border-b border-base-content/10">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-warning/20 text-warning">
+            <div className="card-premium p-5 sm:p-6 space-y-4">
+              <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100">
                     <AlertTriangle size={20} />
                   </div>
                   <div>
-                    <h2 className="font-display font-bold text-base sm:text-lg text-base-content">
-                      Problem Triage Hub ({issues.filter(i => i.status !== 'RESOLVED').length})
+                    <h2 className="font-display font-bold text-base sm:text-lg text-slate-900">
+                      Problem Triage Hub ({openIssuesCount})
                     </h2>
-                    <p className="text-xs text-base-content/60">
-                      Solve issues locally or escalate critical bottlenecks to the Event Creator
+                    <p className="text-xs text-slate-500">
+                      Solve issues locally or escalate critical bottlenecks to Event Creator
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 space-y-3">
+              <div className="space-y-3">
                 {issues.length === 0 ? (
-                  <div className="text-center py-6 text-xs text-base-content/50">
-                    No open problems reported in {selectedDept.name}.
+                  <div className="text-center py-8 text-xs text-slate-400 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                    No open problems reported in {selectedDept.name}. Everything running smoothly!
                   </div>
                 ) : (
                   issues.map((iss) => {
@@ -243,33 +250,33 @@ export const TeamLeaderDashboard = () => {
                         key={iss.id}
                         className={`p-4 rounded-2xl border transition-all ${
                           isResolved 
-                            ? 'bg-base-100/40 border-base-content/10 opacity-70' 
+                            ? 'bg-slate-50 border-slate-200 opacity-70' 
                             : isEscalated 
-                              ? 'bg-base-100 border-error/40 glow-critical' 
-                              : 'bg-base-100 border-warning/40 shadow-sm'
+                              ? 'bg-rose-50/60 border-rose-200 glow-critical' 
+                              : 'bg-amber-50/50 border-amber-200/80 shadow-xs'
                         }`}
                       >
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className={`badge badge-sm font-bold ${
-                                isResolved ? 'badge-success' : isEscalated ? 'badge-error text-white' : 'badge-warning'
+                              <span className={`badge badge-sm font-bold shadow-xs ${
+                                isResolved ? 'badge-success text-white' : isEscalated ? 'badge-error text-white' : 'badge-warning text-slate-900 font-bold'
                               }`}>
                                 {iss.status}
                               </span>
-                              <span className="badge badge-sm badge-outline">{iss.category}</span>
-                              <span className="text-xs text-base-content/60 font-mono">
-                                Priority: <strong className={iss.priority === 'CRITICAL' ? 'text-error' : 'text-warning'}>{iss.priority}</strong>
+                              <span className="badge badge-sm bg-white text-slate-700 border border-slate-200 font-semibold">{iss.category}</span>
+                              <span className="text-xs font-mono text-slate-500">
+                                Priority: <strong className={iss.priority === 'CRITICAL' ? 'text-rose-600 font-bold' : 'text-amber-600 font-bold'}>{iss.priority}</strong>
                               </span>
                             </div>
-                            <h3 className="font-bold text-sm text-base-content">{iss.title}</h3>
-                            <p className="text-xs text-base-content/70">{iss.description}</p>
+                            <h3 className="font-bold text-sm text-slate-900 mt-1">{iss.title}</h3>
+                            <p className="text-xs text-slate-600 leading-relaxed">{iss.description}</p>
                           </div>
 
                           <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
                             <button
                               onClick={() => openIssueChat(iss.id)}
-                              className="btn btn-xs btn-primary gap-1 font-semibold"
+                              className="btn btn-xs bg-indigo-600 hover:bg-indigo-700 text-white gap-1 font-bold rounded-xl border-none shadow-xs"
                             >
                               <MessageSquare size={13} /> Chat
                             </button>
@@ -277,7 +284,7 @@ export const TeamLeaderDashboard = () => {
                             {!isResolved && !isEscalated && (
                               <button
                                 onClick={() => handleEscalate(iss.id)}
-                                className="btn btn-xs btn-error text-white font-bold gap-1"
+                                className="btn btn-xs bg-rose-600 hover:bg-rose-700 text-white font-bold gap-1 rounded-xl border-none shadow-xs"
                               >
                                 <ShieldAlert size={13} /> Escalate
                               </button>
@@ -286,7 +293,7 @@ export const TeamLeaderDashboard = () => {
                             {!isResolved && (
                               <button
                                 onClick={() => handleResolve(iss.id)}
-                                className="btn btn-xs btn-success text-white font-bold gap-1"
+                                className="btn btn-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-1 rounded-xl border-none shadow-xs"
                               >
                                 <CheckCircle2 size={13} /> Resolve
                               </button>
@@ -301,105 +308,137 @@ export const TeamLeaderDashboard = () => {
             </div>
 
             {/* Department Tasks Board */}
-            <div className="bg-base-200/90 border border-base-content/10 rounded-3xl p-5 shadow-lg">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-base-content/10">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-primary/20 text-primary">
+            <div className="card-premium p-5 sm:p-6 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3.5 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100">
                     <Layers size={20} />
                   </div>
                   <div>
-                    <h2 className="font-display font-bold text-base sm:text-lg text-base-content">
+                    <h2 className="font-display font-bold text-base sm:text-lg text-slate-900">
                       Department Tasks ({filteredTasks.length})
                     </h2>
-                    <p className="text-xs text-base-content/60">Assigned work in {selectedDept.name}</p>
+                    <p className="text-xs text-slate-500">Assigned work & proof reviews in {selectedDept.name}</p>
                   </div>
                 </div>
 
                 {/* Filter Tabs */}
-                <div className="flex items-center gap-1 bg-base-100 p-1 rounded-xl border border-base-content/10 text-xs overflow-x-auto">
-                  {['ALL', 'IN_PROGRESS', 'BLOCKED', 'OVERDUE', 'COMPLETED'].map((f) => (
+                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs overflow-x-auto">
+                  {['ALL', 'PENDING_APPROVAL', 'IN_PROGRESS', 'BLOCKED', 'OVERDUE', 'COMPLETED'].map((f) => (
                     <button
                       key={f}
                       onClick={() => setTaskFilter(f)}
-                      className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
-                        taskFilter === f ? 'bg-primary text-white font-bold shadow-sm' : 'text-base-content/70 hover:bg-base-200'
+                      className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+                        taskFilter === f ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
-                      {f.replace('_', ' ')}
+                      {f === 'PENDING_APPROVAL' ? `PROOF SUBMITTED (${pendingApprovalCount})` : f.replace('_', ' ')}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="mt-4 space-y-3">
+              <div className="space-y-3">
                 {filteredTasks.length === 0 ? (
-                  <p className="text-xs text-base-content/50 py-8 text-center">No tasks matching selected filter.</p>
+                  <p className="text-xs text-slate-400 py-10 text-center">No tasks matching selected filter.</p>
                 ) : (
                   filteredTasks.map((t) => {
                     const isAssigned = !!(t.assignee?.name || t.assignedTo?.name || (t.assignedTo && typeof t.assignedTo === 'object'));
                     const assigneeName = t.assignee?.name || t.assignedTo?.name || (t.assignedTo && typeof t.assignedTo === 'string' ? 'Assigned' : 'Unassigned');
+                    const isPendingApproval = t.status === 'PENDING_APPROVAL';
 
                     return (
                       <div
                         key={t.id}
-                        className="p-4 rounded-2xl bg-base-100 border border-base-content/10 hover:border-base-content/25 transition-all space-y-3 shadow-sm"
+                        className={`p-4 rounded-2xl border transition-all space-y-3 shadow-xs ${
+                          isPendingApproval 
+                            ? 'bg-amber-50/40 border-amber-300 glow-warning' 
+                            : 'bg-white border-slate-200 hover:border-slate-300'
+                        }`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className={`badge badge-xs font-bold ${
-                                t.status === 'COMPLETED' ? 'badge-success' : t.status === 'BLOCKED' ? 'badge-error' : t.status === 'OVERDUE' ? 'badge-warning' : 'badge-info'
+                              <span className={`badge badge-xs font-bold shadow-xs ${
+                                isPendingApproval 
+                                  ? 'badge-warning text-slate-900 font-bold' 
+                                  : t.status === 'COMPLETED' 
+                                    ? 'badge-success text-white' 
+                                    : t.status === 'BLOCKED' 
+                                      ? 'badge-error text-white' 
+                                      : t.status === 'OVERDUE' 
+                                        ? 'badge-warning text-slate-900' 
+                                        : 'bg-indigo-600 text-white'
                               }`}>
-                                {t.status}
+                                {isPendingApproval ? '🟡 PROOF SUBMITTED' : t.status}
                               </span>
-                              <span className="badge badge-xs badge-ghost font-mono">{t.priority}</span>
+                              <span className="badge badge-xs bg-slate-100 text-slate-700 border border-slate-200 font-mono">{t.priority}</span>
                             </div>
-                            <h4 className="font-bold text-sm text-base-content mt-1">{t.title}</h4>
+                            <h4 className="font-bold text-sm text-slate-900 mt-1">{t.title}</h4>
                             {t.description && (
-                              <p className="text-xs text-base-content/65 leading-relaxed">{t.description}</p>
+                              <p className="text-xs text-slate-600 leading-relaxed">{t.description}</p>
                             )}
                           </div>
 
                           <div className="text-right shrink-0">
-                            <span className="text-xs font-mono text-warning font-semibold flex items-center gap-1">
+                            <span className="text-xs font-mono text-amber-600 font-bold flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-100">
                               <Clock size={12} />
                               {new Date(t.deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           </div>
                         </div>
 
-                        {/* Interactive Assignee Action & Live Progress */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2.5 border-t border-base-content/5">
+                        {/* Interactive Assignee Action, Proof Review & Live Progress */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2.5 border-t border-slate-100">
                           
-                          {/* 1-Click Interactive Assignee Button */}
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-base-content/60">Assignee:</span>
+                          {/* 1-Click Interactive Assignee Button & Review Proof Button */}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs text-slate-500 font-medium">Assignee:</span>
                             {isAssigned && assigneeName !== 'Unassigned' ? (
                               <button
                                 onClick={() => setTaskToAssign(t)}
-                                className="btn btn-xs btn-outline border-base-content/20 hover:border-primary hover:bg-primary/10 gap-1.5 rounded-xl font-bold normal-case text-xs text-base-content"
+                                className="btn btn-xs bg-slate-50 hover:bg-slate-100 border border-slate-200 gap-1.5 rounded-xl font-bold normal-case text-xs text-slate-800 shadow-xs"
                                 title="Click to change or reassign worker"
                               >
-                                <span className="w-2 h-2 rounded-full bg-success"></span>
+                                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                                 <span>{assigneeName}</span>
-                                <span className="text-[10px] text-primary underline ml-1">Change</span>
+                                <span className="text-[10px] text-indigo-600 underline ml-1 font-semibold">Change</span>
                               </button>
                             ) : (
                               <button
                                 onClick={() => setTaskToAssign(t)}
-                                className="btn btn-xs btn-warning btn-outline gap-1.5 rounded-xl font-bold normal-case text-xs animate-pulse"
+                                className="btn btn-xs bg-amber-50 border border-amber-300 text-amber-800 hover:bg-amber-100 gap-1.5 rounded-xl font-bold normal-case text-xs animate-pulse shadow-xs"
                                 title="Click to assign a worker from your department"
                               >
                                 <UserCheck size={12} />
                                 <span>+ Assign Worker</span>
                               </button>
                             )}
+
+                            {/* Proof Review Action Button */}
+                            {isPendingApproval && (
+                              <button
+                                onClick={() => setSelectedTaskForReview(t)}
+                                className="btn btn-xs bg-amber-500 hover:bg-amber-600 text-slate-950 font-black gap-1 rounded-xl shadow-md animate-pulse border-none"
+                              >
+                                <Camera size={13} /> Review Proof & Approve
+                              </button>
+                            )}
+
+                            {t.status === 'COMPLETED' && t.proofImage && (
+                              <button
+                                onClick={() => setSelectedTaskForReview(t)}
+                                className="btn btn-xs btn-ghost text-indigo-600 text-[11px] underline font-bold"
+                              >
+                                View Proof
+                              </button>
+                            )}
                           </div>
 
-                          {/* Progress */}
+                          {/* Progress bar */}
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-primary">{t.progress}%</span>
-                            <progress className="progress progress-primary w-24 h-1.5" value={t.progress} max="100"></progress>
+                            <span className="text-xs font-bold text-indigo-600 font-mono">{t.progress}%</span>
+                            <progress className="progress progress-primary w-24 h-2 bg-slate-100" value={t.progress} max="100"></progress>
                           </div>
                         </div>
                       </div>
@@ -411,72 +450,72 @@ export const TeamLeaderDashboard = () => {
 
           </div>
 
-          {/* Right 1 Col: Department Team Roster with Direct Contact Actions */}
+          {/* Right 1 Col: Department Team Roster */}
           <div className="space-y-6">
-            <div className="bg-base-200/90 border border-base-content/10 rounded-3xl p-5 shadow-lg">
-              <div className="flex items-center justify-between pb-3 border-b border-base-content/10">
+            <div className="card-premium p-5 space-y-4">
+              <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <Users size={18} className="text-secondary" />
-                  <h3 className="font-display font-bold text-base text-base-content">
+                  <Users size={18} className="text-indigo-600" />
+                  <h3 className="font-display font-bold text-base text-slate-900">
                     Team Members ({deptDetails?.members?.length || 0})
                   </h3>
                 </div>
                 <button
                   onClick={() => setIsWorkerModalOpen(true)}
-                  className="btn btn-secondary btn-sm rounded-xl font-bold gap-1 shadow-sm"
+                  className="btn btn-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl font-bold gap-1 shadow-xs"
                   title="Search & Add Worker"
                 >
-                  <UserPlus size={14} /> Add Worker
+                  <UserPlus size={13} /> Add
                 </button>
               </div>
 
-              <div className="mt-3 space-y-2.5">
+              <div className="space-y-2">
                 {!deptDetails?.members || deptDetails.members.length === 0 ? (
-                  <div className="text-center py-6 space-y-2">
-                    <p className="text-xs text-base-content/50">No workers assigned to this team yet.</p>
+                  <div className="text-center py-8 space-y-2 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 p-4">
+                    <p className="text-xs text-slate-400">No workers assigned to this department yet.</p>
                     <button
                       onClick={() => setIsWorkerModalOpen(true)}
-                      className="btn btn-xs btn-outline btn-secondary rounded-xl font-bold gap-1"
+                      className="btn btn-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold gap-1 border-none shadow-xs"
                     >
                       <UserPlus size={12} /> Search & Add Workers
                     </button>
                   </div>
                 ) : (
                   deptDetails.members.map((m) => (
-                    <div key={m.id} className="p-3 rounded-2xl bg-base-100 border border-base-content/10 flex items-center justify-between gap-2 shadow-sm">
+                    <div key={m.id} className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200 flex items-center justify-between gap-2 shadow-xs">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className="avatar">
-                          <div className="w-8 h-8 rounded-full bg-base-300 ring-1 ring-base-content/10">
+                          <div className="w-8 h-8 rounded-full ring-2 ring-indigo-200">
                             <img src={m.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${m.name}`} alt={m.name} />
                           </div>
                         </div>
                         <div className="min-w-0">
-                          <div className="font-bold text-xs text-base-content truncate">{m.name}</div>
-                          <div className="text-[11px] font-mono text-primary truncate">{m.phone}</div>
+                          <div className="font-bold text-xs text-slate-900 truncate">{m.name}</div>
+                          <div className="text-[11px] font-mono text-indigo-600 font-semibold truncate">{m.phone || 'No phone'}</div>
                         </div>
                       </div>
 
                       {/* Phone & WhatsApp Quick Connect & Remove */}
                       <div className="flex items-center gap-1">
                         <a
-                          href={`tel:${m.phone.replace(/[^0-9+]/g, '')}`}
-                          className="btn btn-ghost btn-circle btn-xs text-success"
+                          href={`tel:${m.phone ? m.phone.replace(/[^0-9+]/g, '') : ''}`}
+                          className="btn btn-ghost btn-circle btn-xs text-emerald-600 hover:bg-emerald-50"
                           title={`Call ${m.name}`}
                         >
                           <Phone size={13} />
                         </a>
                         <a
-                          href={`https://wa.me/${m.phone.replace(/[^0-9]/g, '')}`}
+                          href={`https://wa.me/${m.phone ? m.phone.replace(/[^0-9]/g, '') : ''}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="btn btn-ghost btn-circle btn-xs text-accent"
+                          className="btn btn-ghost btn-circle btn-xs text-sky-600 hover:bg-sky-50"
                           title={`WhatsApp message to ${m.name}`}
                         >
                           <ExternalLink size={13} />
                         </a>
                         <button
                           onClick={() => handleRemoveMember(m.membershipId)}
-                          className="btn btn-ghost btn-circle btn-xs text-error/60 hover:text-error"
+                          className="btn btn-ghost btn-circle btn-xs text-rose-400 hover:text-rose-600 hover:bg-rose-50"
                           title={`Remove ${m.name} from department`}
                         >
                           <UserX size={13} />
@@ -524,6 +563,18 @@ export const TeamLeaderDashboard = () => {
         onAssigned={() => {
           loadDepartmentData(selectedDeptId);
           loadMyDepartments();
+        }}
+      />
+
+      {/* 4. Review Task Proof Modal */}
+      <ReviewTaskProofModal
+        isOpen={Boolean(selectedTaskForReview)}
+        onClose={() => setSelectedTaskForReview(null)}
+        task={selectedTaskForReview}
+        onSuccess={() => {
+          loadDepartmentData(selectedDeptId);
+          loadMyDepartments();
+          refreshEventData();
         }}
       />
 

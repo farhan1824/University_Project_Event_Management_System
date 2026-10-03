@@ -2,54 +2,98 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Glassmorphism and Custom Glows */
+@layer base {
+  body {
+    background-color: #f8fafc;
+    color: #0f172a;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Premium Light Glassmorphism & Surface Tokens */
 .glass-panel {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 .glass-card {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid #e2e8f0;
 }
 
+.card-premium {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-premium:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 30px -4px rgba(15, 23, 42, 0.08);
+}
+
+/* Subtle Glows for Light Mode */
 .glow-critical {
-  box-shadow: 0 0 20px -3px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 25px -4px rgba(239, 68, 68, 0.25);
 }
 
 .glow-primary {
-  box-shadow: 0 0 20px -3px rgba(59, 130, 246, 0.35);
+  box-shadow: 0 0 25px -4px rgba(79, 70, 229, 0.22);
 }
 
 .glow-success {
-  box-shadow: 0 0 20px -3px rgba(34, 197, 94, 0.35);
+  box-shadow: 0 0 25px -4px rgba(16, 185, 129, 0.25);
 }
 
-/* Custom Scrollbars */
+.glow-warning {
+  box-shadow: 0 0 25px -4px rgba(245, 158, 11, 0.25);
+}
+
+/* Mobile Safe-Area Utilities */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0.5rem);
+}
+
+/* Touch feedback */
+.touch-active {
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+.touch-active:active {
+  transform: scale(0.97);
+}
+
+/* Custom Scrollbars for Clean Light Theme */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.5);
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.4);
+  background: #cbd5e1;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.8);
+  background: #94a3b8;
 }
 
-/* Animations */
+/* Smooth Pulse Animation */
 @keyframes pulse-subtle {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.02); }
+  50% { opacity: 0.88; transform: scale(1.015); }
 }
 
 .animate-pulse-subtle {
-  animation: pulse-subtle 3s infinite ease-in-out;
+  animation: pulse-subtle 2.5s infinite ease-in-out;
 }
+

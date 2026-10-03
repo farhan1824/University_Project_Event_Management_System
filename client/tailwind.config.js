@@ -7,9 +7,15 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        display: ['Outfit', 'sans-serif'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        display: ['Outfit', 'Inter', 'sans-serif'],
       },
+      boxShadow: {
+        'premium': '0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03)',
+        'premium-hover': '0 10px 30px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04)',
+        'bottom-nav': '0 -4px 24px -2px rgba(15, 23, 42, 0.08)',
+        'modal': '0 25px 50px -12px rgba(15, 23, 42, 0.25)',
+      }
     },
   },
   plugins: [
@@ -18,27 +24,32 @@ export default {
   daisyui: {
     themes: [
       {
-        darkModern: {
-          "primary": "#3b82f6",
-          "secondary": "#8b5cf6",
-          "accent": "#06b6d4",
+        eventOpsLight: {
+          "primary": "#4f46e5",
+          "primary-content": "#ffffff",
+          "secondary": "#7c3aed",
+          "secondary-content": "#ffffff",
+          "accent": "#0284c7",
+          "accent-content": "#ffffff",
           "neutral": "#1e293b",
-          "base-100": "#0f172a",
-          "base-200": "#090d16",
-          "base-300": "#04070d",
-          "info": "#38bdf8",
-          "success": "#22c55e",
+          "neutral-content": "#f8fafc",
+          "base-100": "#ffffff",
+          "base-200": "#f8fafc",
+          "base-300": "#f1f5f9",
+          "base-content": "#0f172a",
+          "info": "#0284c7",
+          "info-content": "#ffffff",
+          "success": "#10b981",
+          "success-content": "#ffffff",
           "warning": "#f59e0b",
+          "warning-content": "#ffffff",
           "error": "#ef4444",
+          "error-content": "#ffffff",
         },
       },
-      "dark",
-      "night",
-      "cyberpunk",
-      "corporate",
-      "emerald",
-      "dracula"
+      "light",
+      "corporate"
     ],
-    defaultTheme: "darkModern"
+    defaultTheme: "eventOpsLight"
   }
 }

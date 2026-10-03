@@ -67,7 +67,7 @@ export const LoginView = () => {
       await login({
         email: firebaseUser.email,
         name: isRegister ? name.trim() : (firebaseUser.displayName || email.split('@')[0]),
-        phone: phone.trim() || '+880 1700-000000',
+        phone: phone.trim() || null,
         avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name || email)}`,
         uid: firebaseUser.uid
       });
@@ -97,7 +97,7 @@ export const LoginView = () => {
       await login({
         email: fbUser.email,
         name: fbUser.displayName || fbUser.email.split('@')[0],
-        phone: fbUser.phoneNumber || '+880 1700-000000',
+        phone: fbUser.phoneNumber || null,
         avatar: fbUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(fbUser.displayName || fbUser.email)}`,
         uid: fbUser.uid
       });
@@ -113,32 +113,32 @@ export const LoginView = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-base-300 via-base-100 to-base-300 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         
         {/* Brand Header */}
         <div className="text-center mb-6">
-          <div className="w-14 h-14 rounded-3xl bg-gradient-to-tr from-primary to-secondary mx-auto flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-primary/30 mb-3">
+          <div className="w-14 h-14 rounded-3xl bg-gradient-to-tr from-primary to-secondary mx-auto flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-primary/25 mb-3">
             ⚡
           </div>
-          <h1 className="font-display font-black text-2xl sm:text-3xl text-base-content tracking-tight">
-            EventOps Command
+          <h1 className="font-display font-black text-2xl sm:text-3xl text-slate-900 tracking-tight">
+            Event<span className="text-primary">Ops</span>
           </h1>
-          <p className="text-xs sm:text-sm text-base-content/60 mt-1">
-            Hierarchical Operations & Escalation Platform
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Real-time Event Operations & Escalation Platform
           </p>
         </div>
 
         {/* Auth Card */}
-        <div className="bg-base-200/90 backdrop-blur-xl border border-base-content/15 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5">
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 space-y-5">
           
           {/* Toggle Sign In / Sign Up */}
-          <div className="flex bg-base-100 p-1 rounded-2xl border border-base-content/10">
+          <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
             <button
               type="button"
               onClick={() => { setIsRegister(false); setError(null); setSuccessMessage(null); }}
               className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
-                !isRegister ? 'bg-primary text-white shadow-md' : 'text-base-content/70 hover:text-base-content'
+                !isRegister ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
               Sign In
@@ -147,7 +147,7 @@ export const LoginView = () => {
               type="button"
               onClick={() => { setIsRegister(true); setError(null); setSuccessMessage(null); }}
               className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
-                isRegister ? 'bg-primary text-white shadow-md' : 'text-base-content/70 hover:text-base-content'
+                isRegister ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
               Create Account
@@ -155,15 +155,15 @@ export const LoginView = () => {
           </div>
 
           {error && (
-            <div className="alert alert-error p-3 rounded-2xl text-xs text-white flex items-center gap-2 animate-in fade-in">
-              <AlertCircle size={16} className="shrink-0" />
+            <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold flex items-center gap-2 animate-in fade-in">
+              <AlertCircle size={16} className="shrink-0 text-rose-600" />
               <span>{error}</span>
             </div>
           )}
 
           {successMessage && (
-            <div className="alert alert-success p-3 rounded-2xl text-xs text-white flex items-center gap-2 animate-in fade-in">
-              <CheckCircle2 size={16} className="shrink-0" />
+            <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 font-semibold flex items-center gap-2 animate-in fade-in">
+              <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
               <span>{successMessage}</span>
             </div>
           )}
@@ -173,8 +173,8 @@ export const LoginView = () => {
             {isRegister && (
               <>
                 <div>
-                  <label className="label-text text-xs font-bold text-base-content/70 mb-1 flex items-center gap-1">
-                    <User size={13} /> Full Name
+                  <label className="label-text text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                    <User size={13} className="text-primary" /> Full Name
                   </label>
                   <input
                     type="text"
@@ -182,29 +182,28 @@ export const LoginView = () => {
                     placeholder="e.g. John Doe"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="input input-sm input-bordered w-full bg-base-100 rounded-xl"
+                    className="input input-sm input-bordered w-full bg-slate-50 focus:bg-white rounded-xl border-slate-200 focus:border-primary text-slate-900"
                   />
                 </div>
 
                 <div>
-                  <label className="label-text text-xs font-bold text-base-content/70 mb-1 flex items-center gap-1">
-                    <Phone size={13} /> Phone Number
+                  <label className="label-text text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                    <Phone size={13} className="text-primary" /> Phone Number (Optional)
                   </label>
                   <input
                     type="tel"
-                    required
-                    placeholder="+1 555-0199"
+                    placeholder="+880 1700-000000"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="input input-sm input-bordered w-full bg-base-100 rounded-xl font-mono"
+                    className="input input-sm input-bordered w-full bg-slate-50 focus:bg-white rounded-xl border-slate-200 focus:border-primary font-mono text-slate-900"
                   />
                 </div>
               </>
             )}
 
             <div>
-              <label className="label-text text-xs font-bold text-base-content/70 mb-1 flex items-center gap-1">
-                <Mail size={13} /> Email Address
+              <label className="label-text text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                <Mail size={13} className="text-primary" /> Email Address
               </label>
               <input
                 type="email"
@@ -212,13 +211,13 @@ export const LoginView = () => {
                 placeholder="your.email@events.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="input input-sm input-bordered w-full bg-base-100 rounded-xl"
+                className="input input-sm input-bordered w-full bg-slate-50 focus:bg-white rounded-xl border-slate-200 focus:border-primary text-slate-900"
               />
             </div>
 
             <div>
-              <label className="label-text text-xs font-bold text-base-content/70 mb-1 flex items-center gap-1">
-                <Lock size={13} /> Password
+              <label className="label-text text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                <Lock size={13} className="text-primary" /> Password
               </label>
               <input
                 type="password"
@@ -226,14 +225,14 @@ export const LoginView = () => {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="input input-sm input-bordered w-full bg-base-100 rounded-xl"
+                className="input input-sm input-bordered w-full bg-slate-50 focus:bg-white rounded-xl border-slate-200 focus:border-primary text-slate-900"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-sm btn-primary w-full rounded-xl font-bold mt-2 shadow-lg shadow-primary/20 gap-1.5"
+              className="btn btn-sm bg-indigo-600 hover:bg-indigo-700 text-white w-full rounded-xl font-bold mt-2 shadow-md shadow-indigo-600/20 gap-1.5 border-none touch-active"
             >
               {loading ? (
                 <span className="loading loading-spinner loading-xs"></span>
@@ -250,7 +249,7 @@ export const LoginView = () => {
           </form>
 
           {/* Divider */}
-          <div className="divider text-[10px] text-base-content/40 uppercase tracking-widest my-2">
+          <div className="divider text-[10px] text-slate-400 uppercase tracking-widest my-2">
             Or continue with
           </div>
 
@@ -259,7 +258,7 @@ export const LoginView = () => {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="btn btn-sm btn-outline border-base-content/20 hover:bg-base-100 w-full rounded-xl gap-2 text-xs normal-case shadow-sm"
+            className="btn btn-sm bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 w-full rounded-xl gap-2 text-xs normal-case shadow-xs touch-active font-semibold"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
@@ -285,7 +284,7 @@ export const LoginView = () => {
         </div>
 
         {/* Footer Role Notice */}
-        <p className="text-center text-[11px] text-base-content/50 mt-4 max-w-xs mx-auto">
+        <p className="text-center text-[11px] text-slate-500 mt-4 max-w-xs mx-auto">
           The first user to register becomes the <strong>Event Creator (Admin)</strong>. Subsequent users register as <strong>Workers</strong> and can be promoted to Team Leaders.
         </p>
 

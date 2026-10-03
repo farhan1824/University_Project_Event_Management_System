@@ -17,7 +17,8 @@ import {
   Layers,
   ChevronDown,
   LogOut,
-  ShieldCheck
+  ShieldCheck,
+  Sparkles
 } from 'lucide-react';
 
 export const Navbar = () => {
@@ -73,36 +74,36 @@ export const Navbar = () => {
   const currentEvent = events.find(e => e.id === selectedEventId);
 
   return (
-    <header className="sticky top-0 z-30 bg-base-200/90 backdrop-blur-md border-b border-base-content/10 px-4 py-2.5">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-slate-200/80 px-3 sm:px-6 py-2.5 shadow-xs">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
         
         {/* Left: Brand & Event Selector */}
-        <div className="flex items-center gap-3 md:gap-6">
+        <div className="flex items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white font-bold text-lg shadow-md shadow-primary/30">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white font-black text-base sm:text-lg shadow-md shadow-primary/25">
               ⚡
             </div>
             <div className="hidden sm:block">
-              <h1 className="font-display font-bold text-lg tracking-tight leading-none bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
-                EventOps
+              <h1 className="font-display font-black text-base sm:text-lg tracking-tight leading-none text-slate-900">
+                Event<span className="text-primary">Ops</span>
               </h1>
-              <span className="text-[10px] text-base-content/50 uppercase tracking-widest font-semibold">
-                Operational Command
+              <span className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">
+                Mobile Command
               </span>
             </div>
           </div>
 
           {/* Event Selector Dropdown */}
           <div className="dropdown">
-            <label tabIndex={0} className="btn btn-sm btn-outline border-base-content/20 bg-base-100/50 hover:bg-base-100 flex items-center gap-2 max-w-[200px] sm:max-w-xs truncate normal-case">
+            <label tabIndex={0} className="btn btn-sm btn-outline border-slate-300 hover:border-primary bg-slate-50 hover:bg-white text-slate-800 flex items-center gap-1.5 max-w-[160px] sm:max-w-xs truncate normal-case rounded-xl shadow-xs">
               <Calendar size={14} className="text-primary shrink-0" />
-              <span className="truncate font-medium text-xs sm:text-sm">
+              <span className="truncate font-semibold text-xs sm:text-sm">
                 {currentEvent ? currentEvent.name : 'Select Event'}
               </span>
-              <ChevronDown size={14} className="opacity-50 shrink-0" />
+              <ChevronDown size={13} className="text-slate-400 shrink-0" />
             </label>
-            <ul tabIndex={0} className="dropdown-content z-50 menu p-2 shadow-2xl bg-base-200 border border-base-content/15 rounded-2xl w-72 sm:w-80 mt-2">
-              <li className="menu-title text-xs font-bold uppercase tracking-wider text-base-content/60 px-3 py-1">
+            <ul tabIndex={0} className="dropdown-content z-50 menu p-2 shadow-modal bg-white border border-slate-200 rounded-2xl w-72 sm:w-80 mt-2">
+              <li className="menu-title text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 py-1">
                 Active Events ({events.length})
               </li>
               {events.map((evt) => (
@@ -110,12 +111,12 @@ export const Navbar = () => {
                   <button
                     onClick={() => switchEvent(evt.id)}
                     className={`flex items-start justify-between p-2.5 rounded-xl transition-all ${
-                      selectedEventId === evt.id ? 'bg-primary/15 text-primary font-bold' : 'hover:bg-base-300'
+                      selectedEventId === evt.id ? 'bg-primary/10 text-primary font-bold' : 'hover:bg-slate-100 text-slate-700'
                     }`}
                   >
                     <div className="flex flex-col text-left">
-                      <span className="text-sm font-semibold">{evt.name}</span>
-                      <span className="text-[11px] text-base-content/60">{evt.location}</span>
+                      <span className="text-xs sm:text-sm font-semibold">{evt.name}</span>
+                      <span className="text-[11px] text-slate-500">{evt.location}</span>
                     </div>
                     <HealthBadge status={evt.healthStatus} label={evt.healthStatus === 'CRITICAL' ? '🔴' : evt.healthStatus === 'ATTENTION_NEEDED' ? '🟡' : '🟢'} size="sm" />
                   </button>
@@ -126,12 +127,12 @@ export const Navbar = () => {
         </div>
 
         {/* Right: Health Status, Live Socket, Notifications, User Menu */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           
-          {/* Active Event Health Indicator */}
+          {/* Active Event Health Indicator (Desktop) */}
           {currentEventData?.health && (
-            <div className="hidden lg:flex items-center gap-2 bg-base-100/70 border border-base-content/10 px-3 py-1 rounded-xl">
-              <span className="text-xs text-base-content/60">Event Health:</span>
+            <div className="hidden lg:flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1 rounded-xl">
+              <span className="text-xs text-slate-500 font-medium">Health:</span>
               <HealthBadge 
                 status={currentEventData.health.healthStatus} 
                 label={currentEventData.health.healthLabel} 
@@ -142,9 +143,13 @@ export const Navbar = () => {
 
           {/* WebSockets Real-time status */}
           <div className="tooltip tooltip-bottom" data-tip={isConnected ? 'Live Real-time WebSockets Connected' : 'Connecting to live updates...'}>
-            <div className={`p-1.5 rounded-lg flex items-center gap-1 text-xs font-mono ${isConnected ? 'text-success bg-success/10' : 'text-warning bg-warning/10'}`}>
-              {isConnected ? <Wifi size={14} className="animate-pulse" /> : <WifiOff size={14} />}
-              <span className="hidden xl:inline text-[10px] uppercase font-bold">{isConnected ? 'LIVE' : 'OFFLINE'}</span>
+            <div className={`px-2 py-1 rounded-xl flex items-center gap-1.5 text-xs font-mono border ${
+              isConnected 
+                ? 'text-emerald-700 bg-emerald-50 border-emerald-200' 
+                : 'text-amber-700 bg-amber-50 border-amber-200'
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
+              <span className="hidden sm:inline text-[10px] uppercase font-bold">{isConnected ? 'LIVE' : 'SYNCING'}</span>
             </div>
           </div>
 
@@ -153,32 +158,32 @@ export const Navbar = () => {
             <label 
               tabIndex={0} 
               onClick={() => setIsNotifOpen(!isNotifOpen)}
-              className="btn btn-ghost btn-circle btn-sm relative"
+              className="btn btn-ghost btn-circle btn-sm relative text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             >
               <Bell size={18} />
               {unreadCount > 0 && (
-                <span className="badge badge-error badge-xs absolute -top-0.5 -right-0.5 text-[10px] font-bold text-white px-1.5 py-0.5 animate-bounce">
+                <span className="badge badge-error badge-xs absolute -top-0.5 -right-0.5 text-[10px] font-bold text-white px-1.5 py-0.5 shadow-sm animate-bounce">
                   {unreadCount}
                 </span>
               )}
             </label>
-            <div tabIndex={0} className="dropdown-content z-50 card card-compact w-80 sm:w-96 p-0 shadow-2xl bg-base-200 border border-base-content/15 rounded-2xl mt-2">
-              <div className="card-body p-3">
-                <div className="flex items-center justify-between border-b border-base-content/10 pb-2">
-                  <h3 className="font-bold text-sm flex items-center gap-1.5">
+            <div tabIndex={0} className="dropdown-content z-50 card card-compact w-80 sm:w-96 p-0 shadow-modal bg-white border border-slate-200 rounded-2xl mt-2">
+              <div className="card-body p-3.5">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                  <h3 className="font-display font-bold text-sm text-slate-900 flex items-center gap-1.5">
                     <Bell size={14} className="text-primary" />
                     Event Notifications
                   </h3>
                   {unreadCount > 0 && (
-                    <button onClick={handleMarkAllRead} className="text-[11px] text-primary hover:underline">
-                      Mark all as read
+                    <button onClick={handleMarkAllRead} className="text-[11px] font-bold text-primary hover:underline">
+                      Mark all read
                     </button>
                   )}
                 </div>
 
                 <div className="max-h-80 overflow-y-auto space-y-2 py-1">
                   {notifications.length === 0 ? (
-                    <div className="py-6 text-center text-xs text-base-content/50">
+                    <div className="py-8 text-center text-xs text-slate-400">
                       No notifications for this event yet.
                     </div>
                   ) : (
@@ -186,19 +191,19 @@ export const Navbar = () => {
                       <div
                         key={notif.id}
                         onClick={() => handleNotificationClick(notif)}
-                        className={`p-2.5 rounded-xl cursor-pointer text-left transition-colors border ${
-                          notif.read ? 'bg-base-100/40 border-transparent opacity-75' : 'bg-base-100 border-primary/20 shadow-sm'
-                        } hover:bg-base-300`}
+                        className={`p-2.5 rounded-xl cursor-pointer text-left transition-all border ${
+                          notif.read ? 'bg-slate-50/60 border-slate-100 opacity-75' : 'bg-indigo-50/50 border-indigo-100 shadow-xs'
+                        } hover:bg-slate-100`}
                       >
                         <div className="flex items-center justify-between text-xs font-semibold">
-                          <span className={notif.type.includes('CRITICAL') ? 'text-error flex items-center gap-1' : 'text-primary'}>
+                          <span className={notif.type.includes('CRITICAL') ? 'text-rose-600 font-bold flex items-center gap-1' : 'text-primary font-bold'}>
                             {notif.title}
                           </span>
-                          <span className="text-[10px] text-base-content/50">
+                          <span className="text-[10px] text-slate-400 font-mono">
                             {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
-                        <p className="text-xs text-base-content/80 mt-1 line-clamp-2">
+                        <p className="text-xs text-slate-600 mt-1 line-clamp-2">
                           {notif.message}
                         </p>
                       </div>
@@ -211,26 +216,26 @@ export const Navbar = () => {
 
           {/* User Account & Role Menu Dropdown */}
           <div className="dropdown dropdown-end">
-            <label tabIndex={0} className="btn btn-ghost btn-sm p-1 gap-2 rounded-2xl border border-base-content/10 flex items-center">
+            <label tabIndex={0} className="btn btn-ghost btn-sm p-1 gap-1.5 sm:gap-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 shadow-xs flex items-center">
               <div className="avatar">
-                <div className="w-7 h-7 rounded-full bg-base-300 ring-1 ring-primary/40">
+                <div className="w-7 h-7 rounded-full ring-2 ring-primary/20">
                   <img src={user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`} alt={user?.name} />
                 </div>
               </div>
               <div className="hidden sm:flex flex-col text-left pr-1">
-                <span className="text-xs font-bold leading-tight truncate max-w-[100px]">{user?.name}</span>
-                <span className="text-[9px] font-mono text-base-content/60 uppercase">
+                <span className="text-xs font-bold text-slate-800 leading-tight truncate max-w-[90px]">{user?.name}</span>
+                <span className="text-[9px] font-mono font-bold text-primary uppercase">
                   {user?.role === 'EVENT_CREATOR' ? '👑 CREATOR' : user?.role === 'TEAM_LEADER' ? '👔 LEADER' : '👷 WORKER'}
                 </span>
               </div>
-              <ChevronDown size={12} className="opacity-50" />
+              <ChevronDown size={12} className="text-slate-400" />
             </label>
-            <ul tabIndex={0} className="dropdown-content z-50 menu p-2 shadow-2xl bg-base-200 border border-base-content/15 rounded-2xl w-64 mt-2 space-y-1">
-              <div className="px-3 py-2.5 border-b border-base-content/10">
-                <div className="font-bold text-base-content text-sm">{user?.name}</div>
-                <div className="text-[11px] text-base-content/60 truncate mt-0.5">{user?.email}</div>
-                <div className="mt-1.5">
-                  <span className="badge badge-primary badge-sm font-bold text-[10px] tracking-wide">
+            <ul tabIndex={0} className="dropdown-content z-50 menu p-2 shadow-modal bg-white border border-slate-200 rounded-2xl w-64 mt-2 space-y-1">
+              <div className="px-3 py-2.5 border-b border-slate-100">
+                <div className="font-bold text-slate-900 text-sm">{user?.name}</div>
+                <div className="text-[11px] text-slate-500 truncate mt-0.5">{user?.email}</div>
+                <div className="mt-2">
+                  <span className="badge badge-primary badge-sm font-bold text-[10px] tracking-wide shadow-xs">
                     {user?.role?.replace('_', ' ')}
                   </span>
                 </div>
@@ -240,7 +245,7 @@ export const Navbar = () => {
                 <li>
                   <button
                     onClick={() => setIsRoleModalOpen(true)}
-                    className="text-xs font-bold text-primary flex items-center gap-2 py-2"
+                    className="text-xs font-bold text-primary flex items-center gap-2 py-2 hover:bg-primary/10 rounded-xl"
                   >
                     <ShieldCheck size={15} /> Manage Roles & Teams
                   </button>
@@ -250,7 +255,7 @@ export const Navbar = () => {
               <li>
                 <button
                   onClick={logout}
-                  className="text-xs font-bold text-error flex items-center gap-2 py-2 hover:bg-error/15"
+                  className="text-xs font-bold text-rose-600 flex items-center gap-2 py-2 hover:bg-rose-50 rounded-xl"
                 >
                   <LogOut size={15} /> Log Out
                 </button>
@@ -271,3 +276,4 @@ export const Navbar = () => {
 };
 
 export default Navbar;
+

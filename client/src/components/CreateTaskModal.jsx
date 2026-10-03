@@ -81,37 +81,40 @@ export const CreateTaskModal = ({ isOpen, onClose, defaultDepartmentId, onSucces
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-base-200 border border-base-content/20 rounded-2xl w-full max-w-lg shadow-2xl p-5 animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-modal p-5 sm:p-6 animate-in zoom-in-95 duration-150 text-left max-h-[92vh] overflow-y-auto">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-base-content/10">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-primary/20 text-primary">
+        <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100">
               <PlusCircle size={22} />
             </div>
             <div>
-              <h3 className="font-display font-bold text-lg text-base-content">Create Operational Task</h3>
-              <p className="text-xs text-base-content/60">Assign work to department workers with a strict deadline</p>
+              <h3 className="font-display font-bold text-base sm:text-lg text-slate-900">Create Operational Task</h3>
+              <p className="text-xs text-slate-500">Assign work to department workers with a strict deadline</p>
             </div>
           </div>
-          <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm">
+          <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm text-slate-400 hover:text-slate-800">
             <X size={18} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-3.5">
+        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           
           {/* Department Selection */}
           <div>
-            <label className="label-text font-bold text-xs uppercase tracking-wider text-base-content/70 mb-1 flex items-center gap-1">
-              <Layers size={13} /> Department
+            <label className="label-text font-bold text-xs uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-1">
+              <Layers size={13} className="text-primary" /> Target Department *
             </label>
             <select
               required
               value={departmentId}
-              onChange={(e) => setDepartmentId(e.target.value)}
-              className="select select-bordered select-sm w-full bg-base-100 rounded-xl"
+              onChange={(e) => {
+                setDepartmentId(e.target.value);
+                setAssignedTo('');
+              }}
+              className="select select-bordered select-sm sm:select-md w-full bg-slate-50 focus:bg-white rounded-xl border-slate-200 focus:border-indigo-600 text-slate-900"
             >
               <option value="" disabled>Select Department</option>
               {departments.map((d) => (
@@ -122,110 +125,109 @@ export const CreateTaskModal = ({ isOpen, onClose, defaultDepartmentId, onSucces
 
           {/* Task Title */}
           <div>
-            <label className="label-text font-bold text-xs uppercase tracking-wider text-base-content/70 mb-1 block">
-              Task Title
+            <label className="label-text font-bold text-xs uppercase tracking-wider text-slate-600 mb-1 block">
+              Task Title *
             </label>
             <input
               type="text"
               required
-              placeholder="e.g. Rig Main Stage Moving Heads & Dimmer Packs"
+              placeholder="e.g. Set up VIP lounge seating & sound check"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="input input-bordered input-sm w-full bg-base-100 rounded-xl"
+              className="input input-bordered input-sm sm:input-md w-full bg-slate-50 focus:bg-white rounded-xl border-slate-200 focus:border-indigo-600 text-xs sm:text-sm text-slate-900"
             />
-          </div>
-
-          {/* Assign Worker & Priority */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="label-text font-bold text-xs uppercase tracking-wider text-base-content/70 mb-1 flex items-center gap-1">
-                <User size={13} /> Assign To
-              </label>
-              <select
-                value={assignedTo}
-                onChange={(e) => setAssignedTo(e.target.value)}
-                className="select select-bordered select-sm w-full bg-base-100 rounded-xl"
-              >
-                <option value="">Unassigned (Any Worker)</option>
-                {availableWorkers.map((w) => (
-                  <option key={w.id} value={w.id}>{w.name} ({w.phone})</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="label-text font-bold text-xs uppercase tracking-wider text-base-content/70 mb-1 flex items-center gap-1">
-                <Flag size={13} /> Priority
-              </label>
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-                className="select select-bordered select-sm w-full bg-base-100 rounded-xl font-medium"
-              >
-                <option value="CRITICAL">🔴 CRITICAL</option>
-                <option value="HIGH">🟠 HIGH</option>
-                <option value="MEDIUM">🔵 MEDIUM</option>
-                <option value="LOW">⚪ LOW</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Deadline Window */}
-          <div>
-            <label className="label-text font-bold text-xs uppercase tracking-wider text-base-content/70 mb-1 flex items-center gap-1">
-              <Clock size={13} /> Deadline Target
-            </label>
-            <div className="grid grid-cols-4 gap-2">
-              {[
-                { label: '2 Hours', val: '2' },
-                { label: '4 Hours', val: '4' },
-                { label: '8 Hours', val: '8' },
-                { label: '24 Hours', val: '24' }
-              ].map((d) => (
-                <button
-                  type="button"
-                  key={d.val}
-                  onClick={() => setDeadlineHours(d.val)}
-                  className={`btn btn-xs rounded-lg ${
-                    deadlineHours === d.val ? 'btn-primary' : 'btn-outline border-base-content/20'
-                  }`}
-                >
-                  {d.label}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Description */}
           <div>
-            <label className="label-text font-bold text-xs uppercase tracking-wider text-base-content/70 mb-1 block">
-              Instructions / Description
+            <label className="label-text font-bold text-xs uppercase tracking-wider text-slate-600 mb-1 block">
+              Instructions & Checkpoints
             </label>
             <textarea
               rows={2}
-              placeholder="Specify technical details, equipment required, and locations..."
+              placeholder="Provide exact checklist instructions for the worker..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="textarea textarea-bordered w-full bg-base-100 rounded-xl text-xs"
+              className="textarea textarea-bordered w-full bg-slate-50 focus:bg-white rounded-xl text-xs border-slate-200 focus:border-indigo-600 text-slate-900"
             ></textarea>
           </div>
 
+          {/* Assign Worker */}
+          <div>
+            <label className="label-text font-bold text-xs uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-1">
+              <User size={13} className="text-primary" /> Assign Ground Worker
+            </label>
+            <select
+              value={assignedTo}
+              onChange={(e) => setAssignedTo(e.target.value)}
+              className="select select-bordered select-sm sm:select-md w-full bg-slate-50 focus:bg-white rounded-xl border-slate-200 focus:border-indigo-600 text-slate-900 text-xs sm:text-sm"
+            >
+              <option value="">-- Unassigned (Delegate later) --</option>
+              {availableWorkers.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name} ({w.phone || 'Ground Worker'})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Priority & Deadline Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="label-text font-bold text-xs uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-1">
+                <Flag size={13} className="text-primary" /> Priority
+              </label>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+                className="select select-bordered select-sm w-full bg-slate-50 focus:bg-white rounded-xl border-slate-200 text-slate-900"
+              >
+                <option value="CRITICAL">🔴 Critical</option>
+                <option value="HIGH">🟡 High</option>
+                <option value="MEDIUM">🔵 Medium</option>
+                <option value="LOW">⚪ Low</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="label-text font-bold text-xs uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-1">
+                <Clock size={13} className="text-primary" /> Target Deadline
+              </label>
+              <select
+                value={deadlineHours}
+                onChange={(e) => setDeadlineHours(e.target.value)}
+                className="select select-bordered select-sm w-full bg-slate-50 focus:bg-white rounded-xl border-slate-200 text-slate-900"
+              >
+                <option value="1">1 Hour</option>
+                <option value="2">2 Hours</option>
+                <option value="4">4 Hours</option>
+                <option value="8">8 Hours</option>
+                <option value="12">12 Hours</option>
+                <option value="24">24 Hours</option>
+              </select>
+            </div>
+          </div>
+
           {/* Actions */}
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-base-content/10">
-            <button type="button" onClick={onClose} className="btn btn-sm btn-ghost">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 pb-safe">
+            <button type="button" onClick={onClose} className="btn btn-sm btn-ghost text-slate-500">
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting || !title.trim() || !departmentId}
-              className="btn btn-sm btn-primary rounded-xl font-bold px-5"
+              className="btn btn-sm bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md shadow-indigo-600/20 px-4 border-none touch-active"
             >
-              {submitting ? <span className="loading loading-spinner loading-xs"></span> : <PlusCircle size={16} />}
-              Assign Task
+              {submitting ? (
+                <span className="loading loading-spinner loading-xs"></span>
+              ) : (
+                'Create & Broadcast Task'
+              )}
             </button>
           </div>
 
         </form>
+
       </div>
     </div>
   );

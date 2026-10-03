@@ -14,11 +14,16 @@ const taskSchema = new mongoose.Schema({
   },
   status: { 
     type: String, 
-    enum: ['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'BLOCKED', 'OVERDUE'], 
+    enum: ['NOT_STARTED', 'IN_PROGRESS', 'PENDING_APPROVAL', 'COMPLETED', 'BLOCKED', 'OVERDUE'], 
     default: 'NOT_STARTED' 
   },
   progress: { type: Number, default: 0, min: 0, max: 100 },
   deadline: { type: Date, required: true },
+  proofImage: { type: String, default: null },
+  proofNotes: { type: String, default: '' },
+  submittedAt: { type: Date, default: null },
+  approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  feedbackNotes: { type: String, default: '' },
   completedAt: { type: Date, default: null }
 }, {
   timestamps: true,

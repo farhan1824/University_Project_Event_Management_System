@@ -56,6 +56,9 @@ export const taskAPI = {
   create: (data) => api.post('/tasks', data),
   update: (id, data) => api.put(`/tasks/${id}`, data),
   start: (id) => api.post(`/tasks/${id}/start`),
+  submitProof: (id, data) => api.post(`/tasks/${id}/submit-proof`, data),
+  approve: (id, data) => api.post(`/tasks/${id}/approve`, data),
+  reject: (id, data) => api.post(`/tasks/${id}/reject`, data),
   complete: (id) => api.post(`/tasks/${id}/complete`),
   delete: (id) => api.delete(`/tasks/${id}`)
 };

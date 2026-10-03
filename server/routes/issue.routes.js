@@ -69,7 +69,11 @@ router.get('/:id', authMiddleware, async (req, res) => {
       leader = await User.findById(issue.departmentId.leaderId, 'name role phone avatar email').lean();
     }
 
-    const creator = await User.findOne({ role: 'EVENT_CREATOR' }, 'name role phone avatar email').lean();
+    // Only include Event Creator if the issue has been escalated!
+    let creator = null;
+    if (issue.isEscalated) {
+      creator = await User.findOne({ role: 'EVENT_CREATOR' }, 'name role phone avatar email').lean();
+    }
 
     res.json({
       success: true,
@@ -116,13 +120,30 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 
     // Initial message in thread
-    await IssueMessage.create({
+    const initMsg = await IssueMessage.create({
       issueId: newIssue._id,
       senderId: req.user._id,
       senderName: req.user.name,
       senderRole: req.user.role,
       message: `[PROBLEM REPORTED] ${category}: ${title}. ${description || ''}`
     });
+
+    if (req.io) {
+      const formattedInitMsg = {
+        ...initMsg.toObject(),
+        id: initMsg._id.toString(),
+        _id: initMsg._id.toString(),
+        issueId: newIssue._id.toString(),
+        createdAt: initMsg.createdAt.toISOString()
+      };
+      req.io.to(`issue_${newIssue._id.toString()}`).emit('new_issue_message', formattedInitMsg);
+      req.io.to(`issue_${newIssue._id.toString()}`).emit('receive_issue_message', formattedInitMsg);
+      req.io.to(`event_${eventId}`).emit('issue_updated', {
+        issue: { ...newIssue.toObject(), id: newIssue._id.toString() },
+        action: 'REPORTED',
+        timestamp: new Date().toISOString()
+      });
+    }
 
     // Notify Team Leader
     const dept = await Department.findById(departmentId);
@@ -170,13 +191,30 @@ router.post('/:id/escalate', authMiddleware, async (req, res) => {
     issue.priority = 'CRITICAL';
     await issue.save();
 
-    await IssueMessage.create({
+    const escMsg = await IssueMessage.create({
       issueId: issue._id,
       senderId: req.user._id,
       senderName: req.user.name,
       senderRole: req.user.role,
       message: `🚨 [ESCALATED TO EVENT CREATOR] ${escalationNote || 'Team Leader unable to resolve locally. Requesting organizer intervention.'}`
     });
+
+    if (req.io) {
+      const formattedEscMsg = {
+        ...escMsg.toObject(),
+        id: escMsg._id.toString(),
+        _id: escMsg._id.toString(),
+        issueId: issue._id.toString(),
+        createdAt: escMsg.createdAt.toISOString()
+      };
+      req.io.to(`issue_${issue._id.toString()}`).emit('new_issue_message', formattedEscMsg);
+      req.io.to(`issue_${issue._id.toString()}`).emit('receive_issue_message', formattedEscMsg);
+      req.io.to(`event_${issue.eventId.toString()}`).emit('issue_updated', {
+        issue: { ...issue.toObject(), id: issue._id.toString() },
+        action: 'ESCALATED',
+        timestamp: new Date().toISOString()
+      });
+    }
 
     const event = await Event.findById(issue.eventId);
     const dept = await Department.findById(issue.departmentId);
@@ -238,13 +276,30 @@ router.post('/:id/resolve', authMiddleware, async (req, res) => {
       }
     }
 
-    await IssueMessage.create({
+    const resMsg = await IssueMessage.create({
       issueId: issue._id,
       senderId: req.user._id,
       senderName: req.user.name,
       senderRole: req.user.role,
       message: `✅ [ISSUE RESOLVED by ${req.user.name}] ${resolutionNote || 'The operational issue has been resolved. Work resuming.'}`
     });
+
+    if (req.io) {
+      const formattedResMsg = {
+        ...resMsg.toObject(),
+        id: resMsg._id.toString(),
+        _id: resMsg._id.toString(),
+        issueId: issue._id.toString(),
+        createdAt: resMsg.createdAt.toISOString()
+      };
+      req.io.to(`issue_${issue._id.toString()}`).emit('new_issue_message', formattedResMsg);
+      req.io.to(`issue_${issue._id.toString()}`).emit('receive_issue_message', formattedResMsg);
+      req.io.to(`event_${issue.eventId.toString()}`).emit('issue_updated', {
+        issue: { ...issue.toObject(), id: issue._id.toString() },
+        action: 'RESOLVED',
+        timestamp: new Date().toISOString()
+      });
+    }
 
     await ActivityLog.create({
       eventId: issue.eventId,
