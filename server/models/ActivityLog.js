@@ -12,7 +12,7 @@ const activityLogSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-activityLogSchema.virtual('id').get(function() {
+activityLogSchema.virtual('id').get(function () {
   return this._id.toHexString();
 });
 
