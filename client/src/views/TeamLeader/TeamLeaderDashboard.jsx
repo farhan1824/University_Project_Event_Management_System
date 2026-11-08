@@ -359,20 +359,22 @@ export const TeamLeaderDashboard = () => {
                         <div className="flex items-start justify-between gap-2">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className={`badge badge-xs font-bold shadow-xs ${
+                              <span className={`inline-flex items-center justify-center font-extrabold tracking-wide text-[10px] sm:text-[11px] px-2.5 py-1 rounded-full shadow-xs leading-none uppercase ${
                                 isPendingApproval 
-                                  ? 'badge-warning text-slate-900 font-bold' 
+                                  ? 'bg-amber-100 text-amber-900 border border-amber-300' 
                                   : t.status === 'COMPLETED' 
-                                    ? 'badge-success text-white' 
+                                    ? 'bg-emerald-600 text-white' 
                                     : t.status === 'BLOCKED' 
-                                      ? 'badge-error text-white' 
+                                      ? 'bg-rose-600 text-white' 
                                       : t.status === 'OVERDUE' 
-                                        ? 'badge-warning text-slate-900' 
+                                        ? 'bg-amber-400 text-slate-950 font-black' 
                                         : 'bg-indigo-600 text-white'
                               }`}>
-                                {isPendingApproval ? '🟡 PROOF SUBMITTED' : t.status}
+                                {isPendingApproval ? '🟡 PROOF SUBMITTED' : t.status.replace('_', ' ')}
                               </span>
-                              <span className="badge badge-xs bg-slate-100 text-slate-700 border border-slate-200 font-mono">{t.priority}</span>
+                              <span className="inline-flex items-center justify-center text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 leading-none">
+                                {t.priority}
+                              </span>
                             </div>
                             <h4 className="font-bold text-sm text-slate-900 mt-1">{t.title}</h4>
                             {t.description && (

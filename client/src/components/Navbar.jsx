@@ -127,12 +127,12 @@ export const Navbar = () => {
         </div>
 
         {/* Right: Health Status, Live Socket, Notifications, User Menu */}
-        <div className="flex items-center gap-1.5 sm:gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-4">
           
           {/* Active Event Health Indicator (Desktop) */}
           {currentEventData?.health && (
-            <div className="hidden lg:flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1 rounded-xl">
-              <span className="text-xs text-slate-500 font-medium">Health:</span>
+            <div className="hidden lg:flex items-center gap-2 bg-slate-50/90 border border-slate-200/90 px-3.5 py-1.5 rounded-2xl shadow-xs">
+              <span className="text-xs font-semibold text-slate-500">Health:</span>
               <HealthBadge 
                 status={currentEventData.health.healthStatus} 
                 label={currentEventData.health.healthLabel} 
@@ -143,13 +143,13 @@ export const Navbar = () => {
 
           {/* WebSockets Real-time status */}
           <div className="tooltip tooltip-bottom" data-tip={isConnected ? 'Live Real-time WebSockets Connected' : 'Connecting to live updates...'}>
-            <div className={`px-2 py-1 rounded-xl flex items-center gap-1.5 text-xs font-mono border ${
+            <div className={`px-2.5 py-1.5 rounded-2xl flex items-center gap-2 text-xs font-mono border shadow-xs transition-colors ${
               isConnected 
-                ? 'text-emerald-700 bg-emerald-50 border-emerald-200' 
-                : 'text-amber-700 bg-amber-50 border-amber-200'
+                ? 'text-emerald-700 bg-emerald-50/80 border-emerald-200' 
+                : 'text-amber-700 bg-amber-50/80 border-amber-200'
             }`}>
               <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
-              <span className="hidden sm:inline text-[10px] uppercase font-bold">{isConnected ? 'LIVE' : 'SYNCING'}</span>
+              <span className="hidden sm:inline text-[10px] uppercase font-black tracking-wide">{isConnected ? 'LIVE' : 'SYNCING'}</span>
             </div>
           </div>
 
@@ -158,7 +158,7 @@ export const Navbar = () => {
             <label 
               tabIndex={0} 
               onClick={() => setIsNotifOpen(!isNotifOpen)}
-              className="btn btn-ghost btn-circle btn-sm relative text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+              className="btn btn-ghost btn-circle btn-sm w-9 h-9 relative text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl"
             >
               <Bell size={18} />
               {unreadCount > 0 && (
@@ -216,19 +216,19 @@ export const Navbar = () => {
 
           {/* User Account & Role Menu Dropdown */}
           <div className="dropdown dropdown-end">
-            <label tabIndex={0} className="btn btn-ghost btn-sm p-1 gap-1.5 sm:gap-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 shadow-xs flex items-center">
+            <label tabIndex={0} className="btn btn-ghost h-auto min-h-0 py-1.5 px-2.5 sm:px-3 gap-2 sm:gap-2.5 rounded-2xl border border-slate-200/90 bg-white hover:bg-slate-50/90 hover:border-slate-300 shadow-xs flex items-center transition-all cursor-pointer">
               <div className="avatar">
-                <div className="w-7 h-7 rounded-full ring-2 ring-primary/20">
+                <div className="w-8 h-8 rounded-full ring-2 ring-primary/20 ring-offset-1">
                   <img src={user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`} alt={user?.name} />
                 </div>
               </div>
-              <div className="hidden sm:flex flex-col text-left pr-1">
-                <span className="text-xs font-bold text-slate-800 leading-tight truncate max-w-[90px]">{user?.name}</span>
-                <span className="text-[9px] font-mono font-bold text-primary uppercase">
+              <div className="hidden sm:flex flex-col text-left pr-1 leading-tight">
+                <span className="text-xs font-bold text-slate-800 truncate max-w-[120px]">{user?.name}</span>
+                <span className="text-[10px] font-mono font-extrabold text-primary uppercase tracking-wide mt-0.5">
                   {user?.role === 'EVENT_CREATOR' ? '👑 CREATOR' : user?.role === 'TEAM_LEADER' ? '👔 LEADER' : '👷 WORKER'}
                 </span>
               </div>
-              <ChevronDown size={12} className="text-slate-400" />
+              <ChevronDown size={14} className="text-slate-400 shrink-0 ml-0.5" />
             </label>
             <ul tabIndex={0} className="dropdown-content z-50 menu p-2 shadow-modal bg-white border border-slate-200 rounded-2xl w-64 mt-2 space-y-1">
               <div className="px-3 py-2.5 border-b border-slate-100">
