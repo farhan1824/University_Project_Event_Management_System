@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { taskAPI, departmentAPI } from '../services/api';
 import { useEvent } from '../context/EventContext';
 import { useSocket } from '../context/SocketContext';
+import { useAuth } from '../context/AuthContext';
 import { PlusCircle, X, Calendar, Clock, User, Layers, Flag } from 'lucide-react';
 
 export const CreateTaskModal = ({ isOpen, onClose, defaultDepartmentId, onSuccess }) => {
+  const { user } = useAuth();
   const { selectedEventId, currentEventData, refreshEventData } = useEvent();
   const { socket } = useSocket();
 
@@ -17,10 +19,36 @@ export const CreateTaskModal = ({ isOpen, onClose, defaultDepartmentId, onSucces
   const [availableWorkers, setAvailableWorkers] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
-  // When department changes, load members of that department
+  // Filter accessible departments:
+  // - If user is a TEAM_LEADER, only show departments whose assigned leader is this user
+  // - If user is an EVENT_CREATOR, show all departments
+  const accessibleDepartments = useMemo(() => {
+    const allDepts = currentEventData?.departments || [];
+    if (!user) return allDepts;
+    if (user.role === 'EVENT_CREATOR') return allDepts;
+    if (user.role === 'TEAM_LEADER') {
+      return allDepts.filter((dept) => {
+        const leaderId = dept.leader?.id || dept.leaderId?._id || dept.leaderId?.id || dept.leaderId;
+        return leaderId && String(leaderId) === String(user.id);
+      });
+    }
+    return [];
+  }, [currentEventData?.departments, user]);
+
+  // When defaultDepartmentId changes or modal opens, pick appropriate department
   useEffect(() => {
-    if (defaultDepartmentId) setDepartmentId(defaultDepartmentId);
-  }, [defaultDepartmentId]);
+    if (defaultDepartmentId) {
+      setDepartmentId(defaultDepartmentId);
+    } else if (accessibleDepartments.length > 0) {
+      // If current selection is invalid or empty, default to the first accessible department
+      const exists = accessibleDepartments.some((d) => d.id === departmentId);
+      if (!exists) {
+        setDepartmentId(accessibleDepartments[0].id);
+      }
+    } else {
+      setDepartmentId('');
+    }
+  }, [defaultDepartmentId, accessibleDepartments]);
 
   useEffect(() => {
     if (departmentId) {
@@ -40,8 +68,6 @@ export const CreateTaskModal = ({ isOpen, onClose, defaultDepartmentId, onSucces
   };
 
   if (!isOpen) return null;
-
-  const departments = currentEventData?.departments || [];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -117,10 +143,15 @@ export const CreateTaskModal = ({ isOpen, onClose, defaultDepartmentId, onSucces
               className="select select-bordered select-sm sm:select-md w-full bg-slate-50 focus:bg-white rounded-xl border-slate-200 focus:border-indigo-600 text-slate-900"
             >
               <option value="" disabled>Select Department</option>
-              {departments.map((d) => (
+              {accessibleDepartments.map((d) => (
                 <option key={d.id} value={d.id}>{d.name}</option>
               ))}
             </select>
+            {user?.role === 'TEAM_LEADER' && accessibleDepartments.length === 0 && (
+              <p className="text-[11px] text-amber-600 mt-1">
+                You are not currently assigned as leader to any department in this event.
+              </p>
+            )}
           </div>
 
           {/* Task Title */}

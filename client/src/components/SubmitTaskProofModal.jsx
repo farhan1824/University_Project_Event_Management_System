@@ -4,14 +4,10 @@ import { useSocket } from '../context/SocketContext';
 import { useEvent } from '../context/EventContext';
 import { 
   Camera, 
-  Upload, 
   X, 
   CheckCircle2, 
-  Image as ImageIcon, 
   Trash2, 
-  RefreshCw, 
-  RotateCcw,
-  Video,
+  RotateCcw, 
   AlertCircle,
   SwitchCamera
 } from 'lucide-react';
@@ -20,7 +16,6 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
   const { selectedEventId, refreshEventData } = useEvent();
   const { socket } = useSocket();
 
-  const [mode, setMode] = useState('camera'); // 'camera' | 'upload'
   const [hasCamera, setHasCamera] = useState(null); // null (checking) | true | false
   const [cameraLoading, setCameraLoading] = useState(false);
   const [cameraFacing, setCameraFacing] = useState('environment'); // 'environment' (back) | 'user' (front)
@@ -32,9 +27,7 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
   const [error, setError] = useState(null);
 
   const videoRef = useRef(null);
-  const canvasRef = useRef(null);
   const streamRef = useRef(null);
-  const fileInputRef = useRef(null);
 
   // Stop active camera stream
   const stopCameraStream = () => {
@@ -53,7 +46,7 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
     }
   };
 
-  // Start Camera Stream
+  // Start Live Camera Stream
   const startCameraStream = async (facing = cameraFacing) => {
     stopCameraStream();
     setCameraLoading(true);
@@ -61,7 +54,7 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setHasCamera(false);
-      setMode('upload');
+      setError('Live camera access is not supported on this browser or device.');
       setCameraLoading(false);
       return;
     }
@@ -74,7 +67,7 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
 
       if (videoDevices.length === 0) {
         setHasCamera(false);
-        setMode('upload');
+        setError('No camera detected. A live camera is required to capture task proof.');
         setCameraLoading(false);
         return;
       }
@@ -91,7 +84,7 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
           audio: false
         });
       } catch (err) {
-        // Fallback to any basic video stream
+        // Fallback to any available video stream
         stream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: false
@@ -104,11 +97,10 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
         await videoRef.current.play().catch(() => {});
       }
       setHasCamera(true);
-      setMode('camera');
     } catch (err) {
       console.warn('Camera not available or permission denied:', err);
       setHasCamera(false);
-      setMode('upload');
+      setError('Camera access denied or unavailable. Please enable camera permission to capture live proof.');
     } finally {
       setCameraLoading(false);
     }
@@ -127,7 +119,6 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
       setProofImage(null);
       setProofNotes('');
       setError(null);
-      // If camera is not yet disabled, attempt starting camera
       startCameraStream('environment');
     } else {
       stopCameraStream();
@@ -138,7 +129,7 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
     };
   }, [isOpen]);
 
-  // Handle snapping photo from live video feed
+  // Handle snapping photo from live camera feed
   const handleSnapPhoto = () => {
     if (!videoRef.current) return;
     const video = videoRef.current;
@@ -151,7 +142,6 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
     canvas.height = height;
 
     const ctx = canvas.getContext('2d');
-    // Draw current frame
     ctx.drawImage(video, 0, 0, width, height);
 
     // Convert to compressed jpeg dataURL
@@ -163,58 +153,9 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
     stopCameraStream();
   };
 
-  // Handle File Upload
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      setError('Please select an image file (PNG, JPG, or JPEG).');
-      return;
-    }
-
-    // Convert to base64 with compression
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 1280;
-        const MAX_HEIGHT = 1280;
-        let w = img.width;
-        let h = img.height;
-
-        if (w > MAX_WIDTH || h > MAX_HEIGHT) {
-          if (w > h) {
-            h = Math.round((h * MAX_WIDTH) / w);
-            w = MAX_WIDTH;
-          } else {
-            w = Math.round((w * MAX_HEIGHT) / h);
-            h = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
-        setProofImage(canvas.toDataURL('image/jpeg', 0.85));
-        setError(null);
-      };
-      img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-  };
-
   const handleRetake = () => {
     setProofImage(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-    if (hasCamera !== false) {
-      setMode('camera');
-      startCameraStream(cameraFacing);
-    }
+    startCameraStream(cameraFacing);
   };
 
   const handleClose = () => {
@@ -225,7 +166,7 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!proofImage) {
-      setError('Please take a photo or upload an image proof of your work.');
+      setError('Please take a live photo proof of your work.');
       return;
     }
 
@@ -293,51 +234,15 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4 flex-1 overflow-y-auto pr-1">
           
-          {/* Mode Switcher Tabs (Live Camera vs File Upload) */}
-          {!proofImage && (
-            <div className="flex items-center justify-between bg-base-100 p-1 rounded-2xl border border-base-content/10">
-              <button
-                type="button"
-                onClick={() => {
-                  setMode('camera');
-                  startCameraStream(cameraFacing);
-                }}
-                className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                  mode === 'camera'
-                    ? 'bg-primary text-white shadow-md shadow-primary/25'
-                    : 'text-base-content/70 hover:text-base-content'
-                }`}
-              >
-                <Video size={14} />
-                <span>Live Camera {hasCamera === true ? '●' : ''}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  stopCameraStream();
-                  setMode('upload');
-                }}
-                className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                  mode === 'upload'
-                    ? 'bg-primary text-white shadow-md shadow-primary/25'
-                    : 'text-base-content/70 hover:text-base-content'
-                }`}
-              >
-                <Upload size={14} />
-                <span>Upload File</span>
-              </button>
-            </div>
-          )}
-
-          {/* Photo Capture / Preview Area */}
+          {/* Live Camera Proof Area */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="label-text font-bold text-xs uppercase tracking-wider text-base-content/70">
-                Photo Proof of Work *
+              <label className="label-text font-bold text-xs uppercase tracking-wider text-base-content/70 flex items-center gap-1.5">
+                <Camera size={14} className="text-primary" />
+                <span>Live Camera Proof *</span>
               </label>
 
-              {mode === 'camera' && !proofImage && availableCamerasCount > 1 && (
+              {!proofImage && availableCamerasCount > 1 && hasCamera && (
                 <button
                   type="button"
                   onClick={toggleCameraFacing}
@@ -349,16 +254,16 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
               )}
             </div>
 
-            {/* STATE 1: Photo Already Captured or Selected */}
+            {/* STATE 1: Photo Captured via Live Camera */}
             {proofImage ? (
               <div className="relative rounded-2xl overflow-hidden border border-success/40 bg-base-300 max-h-64 group shadow-md">
                 <img
                   src={proofImage}
-                  alt="Captured Proof"
+                  alt="Captured Live Proof"
                   className="w-full h-52 sm:h-60 object-cover"
                 />
                 <div className="absolute top-2 left-2 bg-success/90 backdrop-blur-md text-white text-[11px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
-                  <CheckCircle2 size={12} /> Ready to Submit
+                  <CheckCircle2 size={12} /> Live Proof Captured
                 </div>
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2.5">
                   <button
@@ -366,24 +271,44 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
                     onClick={handleRetake}
                     className="btn btn-sm btn-primary rounded-xl gap-1.5 shadow-lg"
                   >
-                    <RotateCcw size={15} /> Retake / Change
+                    <RotateCcw size={15} /> Retake Photo
                   </button>
                   <button
                     type="button"
-                    onClick={() => setProofImage(null)}
+                    onClick={handleRetake}
                     className="btn btn-sm btn-error text-white rounded-xl gap-1 shadow-lg"
                   >
-                    <Trash2 size={15} /> Remove
+                    <Trash2 size={15} /> Discard
                   </button>
                 </div>
               </div>
-            ) : mode === 'camera' ? (
-              /* STATE 2: Live Camera Viewfinder */
+            ) : hasCamera === false ? (
+              /* Camera Not Available / Permission Denied */
+              <div className="rounded-2xl border border-error/30 bg-error/10 p-6 flex flex-col items-center justify-center text-center space-y-3 min-h-[220px]">
+                <div className="w-12 h-12 rounded-full bg-error/20 text-error flex items-center justify-center">
+                  <Camera size={24} />
+                </div>
+                <div className="max-w-xs">
+                  <p className="font-bold text-sm text-base-content">Camera Not Available</p>
+                  <p className="text-xs text-base-content/70 mt-1">
+                    Live camera capture is required to submit task proof. Please grant camera permissions or connect a camera device.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => startCameraStream(cameraFacing)}
+                  className="btn btn-sm btn-outline btn-error rounded-xl gap-1.5"
+                >
+                  <RotateCcw size={14} /> Retry Camera
+                </button>
+              </div>
+            ) : (
+              /* STATE 2: Active Live Camera Viewfinder */
               <div className="relative rounded-2xl overflow-hidden border border-base-content/20 bg-black flex flex-col items-center justify-center min-h-[230px] sm:min-h-[270px]">
                 {cameraLoading ? (
                   <div className="flex flex-col items-center justify-center gap-2 p-8 text-center text-white/70">
                     <span className="loading loading-spinner loading-md text-primary"></span>
-                    <span className="text-xs font-semibold">Detecting and activating camera...</span>
+                    <span className="text-xs font-semibold">Activating live camera...</span>
                   </div>
                 ) : (
                   <>
@@ -395,7 +320,7 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
                       className="w-full h-52 sm:h-64 object-cover"
                     />
 
-                    {/* Shutter Bar */}
+                    {/* Live Shutter Button */}
                     <div className="absolute bottom-3 inset-x-0 flex items-center justify-center gap-3 px-4">
                       <button
                         type="button"
@@ -409,38 +334,12 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
 
                     <div className="absolute top-2.5 left-2.5 bg-black/60 backdrop-blur-md text-white/90 text-[10px] font-mono px-2 py-0.5 rounded-md flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                      <span>LIVE VIEW</span>
+                      <span>LIVE CAMERA</span>
                     </div>
                   </>
                 )}
               </div>
-            ) : (
-              /* STATE 3: File Upload Fallback */
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-base-content/20 hover:border-primary/60 bg-base-100/50 hover:bg-base-100 rounded-2xl p-7 text-center cursor-pointer transition-all space-y-2 group"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 group-hover:bg-primary/20 text-primary flex items-center justify-center mx-auto transition-colors">
-                  <Upload size={24} />
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm font-bold text-base-content">
-                    Click to browse or drop an image file
-                  </p>
-                  <p className="text-[11px] text-base-content/50 mt-0.5">
-                    Supports PNG, JPG, JPEG up to 10MB
-                  </p>
-                </div>
-              </div>
             )}
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="hidden"
-            />
           </div>
 
           {/* Optional Notes for Team Leader */}
@@ -486,4 +385,3 @@ export const SubmitTaskProofModal = ({ isOpen, onClose, task, onSuccess }) => {
 };
 
 export default SubmitTaskProofModal;
-

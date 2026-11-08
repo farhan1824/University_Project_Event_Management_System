@@ -108,6 +108,27 @@ router.post('/', authMiddleware, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Event, Department, and Title are required' });
     }
 
+    // Verify department access: Team Leaders can ONLY create tasks for departments they lead
+    const dept = await Department.findById(departmentId);
+    if (!dept) {
+      return res.status(404).json({ success: false, message: 'Department not found' });
+    }
+
+    if (req.user.role === 'TEAM_LEADER') {
+      const isLeader = dept.leaderId && dept.leaderId.toString() === req.user._id.toString();
+      if (!isLeader) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied: You can only create tasks for departments you lead.'
+        });
+      }
+    } else if (req.user.role !== 'EVENT_CREATOR') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied: Only Team Leaders and Event Creators can create tasks.'
+      });
+    }
+
     const newTask = await Task.create({
       eventId,
       departmentId,
