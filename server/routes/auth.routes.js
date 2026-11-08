@@ -6,10 +6,69 @@ const TeamMembership = require('../models/TeamMembership');
 const ActivityLog = require('../models/ActivityLog');
 const { authMiddleware, requireRole } = require('../middleware/auth');
 
-// Get all registered users (annotated with their departments)
+const Event = require('../models/Event');
+
+// Get registered users (Scoped to accessible events for EVENT_CREATOR, or role-based)
 router.get('/users', authMiddleware, async (req, res) => {
   try {
-    const users = await User.find().lean();
+    let userFilter = {};
+
+    if (req.user.role === 'EVENT_CREATOR') {
+      // Find all events owned by or collaborated with this creator
+      const myEvents = await Event.find({
+        $or: [
+          { createdBy: req.user._id },
+          { collaborators: req.user._id }
+        ]
+      }).select('_id collaborators createdBy').lean();
+
+      const myEventIds = myEvents.map(e => e._id);
+
+      // Find departments & memberships in accessible events
+      const depts = await Department.find({ eventId: { $in: myEventIds } }).lean();
+      const membs = await TeamMembership.find({ eventId: { $in: myEventIds } }).lean();
+
+      const allowedUserIds = new Set();
+      allowedUserIds.add(req.user._id.toString());
+
+      // Add collaborators & creators of accessible events
+      myEvents.forEach(e => {
+        if (e.createdBy) allowedUserIds.add(e.createdBy.toString());
+        if (Array.isArray(e.collaborators)) {
+          e.collaborators.forEach(c => allowedUserIds.add(c.toString()));
+        }
+      });
+
+      // Add leaders
+      depts.forEach(d => {
+        if (d.leaderId) allowedUserIds.add(d.leaderId.toString());
+      });
+
+      // Add members
+      membs.forEach(m => {
+        if (m.userId) allowedUserIds.add(m.userId.toString());
+      });
+
+      // Find all workers that are NOT exclusively tied to other creators' private events (available pool)
+      const otherEvents = await Event.find({ _id: { $nin: myEventIds } }).select('_id').lean();
+      const otherEventIds = otherEvents.map(e => e._id);
+      const otherMembs = await TeamMembership.find({ eventId: { $in: otherEventIds } }).select('userId').lean();
+      const otherDepts = await Department.find({ eventId: { $in: otherEventIds } }).select('leaderId').lean();
+
+      const privateOtherUserIds = new Set();
+      otherMembs.forEach(m => { if (m.userId) privateOtherUserIds.add(m.userId.toString()); });
+      otherDepts.forEach(d => { if (d.leaderId) privateOtherUserIds.add(d.leaderId.toString()); });
+
+      // Keep only users that are in my events OR not locked to another creator's private event
+      userFilter = {
+        $or: [
+          { _id: { $in: Array.from(allowedUserIds) } },
+          { _id: { $nin: Array.from(privateOtherUserIds) } }
+        ]
+      };
+    }
+
+    const users = await User.find(userFilter).lean();
     const departments = await Department.find().lean();
     const memberships = await TeamMembership.find().lean();
 

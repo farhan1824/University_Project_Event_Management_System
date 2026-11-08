@@ -6,7 +6,8 @@ const eventSchema = new mongoose.Schema({
   location: { type: String, default: 'TBD', trim: true },
   startDate: { type: Date, default: Date.now },
   endDate: { type: Date, default: () => new Date(Date.now() + 86400000) },
-  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  collaborators: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true }],
   status: { type: String, enum: ['ACTIVE', 'PLANNING', 'COMPLETED', 'CANCELLED'], default: 'ACTIVE' }
 }, {
   timestamps: true,

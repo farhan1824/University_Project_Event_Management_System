@@ -48,6 +48,7 @@ app.use('/api/issues', require('./routes/issue.routes'));
 app.use('/api/messages', require('./routes/message.routes'));
 app.use('/api/notifications', require('./routes/notification.routes'));
 app.use('/api/activities', require('./routes/activity.routes'));
+app.use('/api/collaborations', require('./routes/collaboration.routes'));
 
 // Root Welcome Route & API Documentation
 app.get('/', (req, res) => {

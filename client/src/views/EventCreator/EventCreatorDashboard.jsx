@@ -7,6 +7,7 @@ import CreateEventModal from '../../components/CreateEventModal';
 import AddDepartmentModal from '../../components/AddDepartmentModal';
 import CreateTaskModal from '../../components/CreateTaskModal';
 import UserRoleManagementModal from '../../components/UserRoleManagementModal';
+import CollaborationManagerModal from '../../components/CollaborationManagerModal';
 import { 
   CheckCircle, 
   Clock, 
@@ -35,6 +36,7 @@ export const EventCreatorDashboard = () => {
   const [isDeptModalOpen, setIsDeptModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [isCollabModalOpen, setIsCollabModalOpen] = useState(false);
 
   // Fetch activity log
   useEffect(() => {
@@ -153,6 +155,13 @@ export const EventCreatorDashboard = () => {
 
           {/* Quick Action Buttons */}
           <div className="flex flex-wrap items-center gap-2 pt-2 lg:pt-0">
+            <button
+              onClick={() => setIsCollabModalOpen(true)}
+              className="btn btn-sm bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 rounded-xl font-bold shadow-md border-none gap-1.5 touch-active"
+              title="Invite another Event Creator to share volunteers and co-manage this event"
+            >
+              <Users size={15} /> Volunteer Sharing & Collab
+            </button>
             <button
               onClick={() => setIsRoleModalOpen(true)}
               className="btn btn-sm bg-white text-indigo-900 hover:bg-slate-100 rounded-xl font-bold shadow-md border-none gap-1.5 touch-active"
@@ -495,6 +504,7 @@ export const EventCreatorDashboard = () => {
       <AddDepartmentModal isOpen={isDeptModalOpen} onClose={() => setIsDeptModalOpen(false)} />
       <CreateTaskModal isOpen={isTaskModalOpen} onClose={() => setIsTaskModalOpen(false)} />
       <UserRoleManagementModal isOpen={isRoleModalOpen} onClose={() => setIsRoleModalOpen(false)} />
+      <CollaborationManagerModal isOpen={isCollabModalOpen} onClose={() => setIsCollabModalOpen(false)} />
 
     </div>
   );

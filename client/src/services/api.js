@@ -86,4 +86,11 @@ export const activityAPI = {
   getAll: (params) => api.get('/activities', { params })
 };
 
+export const collaborationAPI = {
+  sendRequest: (data) => api.post('/collaborations', data),
+  getPending: () => api.get('/collaborations/pending'),
+  respond: (id, action) => api.post(`/collaborations/${id}/respond`, { action }),
+  getEventCollaborations: (eventId) => api.get(`/collaborations/event/${eventId}`)
+};
+
 export default api;

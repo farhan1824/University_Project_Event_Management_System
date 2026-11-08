@@ -4,6 +4,7 @@ import { useEvent } from './context/EventContext';
 import Navbar from './components/Navbar';
 import EscalationChat from './components/EscalationChat';
 import CollectPhoneModal from './components/CollectPhoneModal';
+import CollaborationRequestModal from './components/CollaborationRequestModal';
 import MobileBottomNav from './components/MobileBottomNav';
 import LoginView from './views/Auth/LoginView';
 import EventCreatorDashboard from './views/EventCreator/EventCreatorDashboard';
@@ -54,6 +55,9 @@ export function App() {
 
       {/* Mandatory Phone Number Popup if user's phone is null */}
       <CollectPhoneModal />
+
+      {/* Collaboration & Volunteer Sharing Request Login Modal */}
+      <CollaborationRequestModal />
 
       {/* Mobile Bottom Navigation Dock (Thumb-friendly for smartphone operations) */}
       <MobileBottomNav 

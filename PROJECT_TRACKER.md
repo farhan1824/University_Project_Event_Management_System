@@ -29,6 +29,7 @@ A centralized, hierarchical event operations and coordination platform connectin
 * [`server/models/Issue.js`](file:///d:/Coding%20Work/University%20Project/server/models/Issue.js): Operational problem reports with categorization, priority levels, and escalation status.
 * [`server/models/IssueMessage.js`](file:///d:/Coding%20Work/University%20Project/server/models/IssueMessage.js): Real-time contextual triage chat threads between Worker ↔ Team Leader ↔ Event Creator.
 * [`server/models/Notification.js`](file:///d:/Coding%20Work/University%20Project/server/models/Notification.js): In-app alerts for assignments, escalations, problem reports, and team changes.
+* [`server/models/CollaborationRequest.js`](file:///d:/Coding%20Work/University%20Project/server/models/CollaborationRequest.js): Cross-creator event collaboration & volunteer pool sharing invitations.
 * [`server/models/ActivityLog.js`](file:///d:/Coding%20Work/University%20Project/server/models/ActivityLog.js): Audit trails and live event timeline activity.
 
 ---

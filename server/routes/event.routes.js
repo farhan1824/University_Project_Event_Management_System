@@ -131,15 +131,37 @@ async function calculateEventHealth(eventId) {
   };
 }
 
-// Get all events
+// Get all events (Filtered by creator or collaboration for EVENT_CREATOR)
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const events = await Event.find().sort({ createdAt: -1 }).lean();
+    let eventFilter = {};
+    if (req.user.role === 'EVENT_CREATOR') {
+      eventFilter = {
+        $or: [
+          { createdBy: req.user._id },
+          { collaborators: req.user._id }
+        ]
+      };
+    } else if (req.user.role === 'TEAM_LEADER' || req.user.role === 'WORKER') {
+      const leadingDepts = await Department.find({ leaderId: req.user._id }).select('eventId').lean();
+      const memberships = await TeamMembership.find({ userId: req.user._id }).select('eventId').lean();
+      const eventIds = [
+        ...leadingDepts.map(d => d.eventId),
+        ...memberships.map(m => m.eventId)
+      ];
+      if (eventIds.length > 0) {
+        eventFilter = { _id: { $in: eventIds } };
+      }
+    }
+
+    const events = await Event.find(eventFilter).sort({ createdAt: -1 }).lean();
     const enrichedEvents = await Promise.all(events.map(async evt => {
       const health = await calculateEventHealth(evt._id);
       return {
         ...evt,
         id: evt._id.toString(),
+        isOwner: evt.createdBy.toString() === req.user._id.toString(),
+        isCollaborator: evt.collaborators && evt.collaborators.some(c => c.toString() === req.user._id.toString()),
         healthStatus: health.healthStatus,
         healthLabel: health.healthLabel,
         overallProgress: health.overallProgress,
@@ -216,11 +238,19 @@ router.post('/', authMiddleware, requireRole('EVENT_CREATOR'), async (req, res) 
   }
 });
 
-// Update event
+// Update event (Owner or Collaborator)
 router.put('/:id', authMiddleware, requireRole('EVENT_CREATOR'), async (req, res) => {
   try {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+
+    const isOwner = event.createdBy.toString() === req.user._id.toString();
+    const isCollab = event.collaborators && event.collaborators.some(c => c.toString() === req.user._id.toString());
+    if (!isOwner && !isCollab) {
+      return res.status(403).json({ success: false, message: 'Unauthorized to update this event' });
+    }
+
     const updated = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updated) return res.status(404).json({ success: false, message: 'Event not found' });
     res.json({ success: true, data: { ...updated.toObject(), id: updated._id.toString() }, message: 'Event updated' });
   } catch (err) {
     console.error(err);
@@ -228,9 +258,16 @@ router.put('/:id', authMiddleware, requireRole('EVENT_CREATOR'), async (req, res
   }
 });
 
-// Delete event
+// Delete event (Original Owner Only)
 router.delete('/:id', authMiddleware, requireRole('EVENT_CREATOR'), async (req, res) => {
   try {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+
+    if (event.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Only the original event creator can delete this event' });
+    }
+
     await Event.findByIdAndDelete(req.params.id);
     await Department.deleteMany({ eventId: req.params.id });
     await Task.deleteMany({ eventId: req.params.id });
