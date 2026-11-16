@@ -12,8 +12,9 @@ export const SocketProvider = ({ children }) => {
   const [activeIssueChat, setActiveIssueChat] = useState(null); // When set, opens the Escalation Chat Drawer
 
   useEffect(() => {
-    // Connect to backend Socket.io server
-    const socketInstance = io(window.location.origin, {
+    // Connect to backend Socket.io server (uses VITE_BACKEND_URL in production, or window.location.origin in dev)
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin;
+    const socketInstance = io(backendUrl, {
       transports: ['websocket', 'polling'],
       reconnectionAttempts: 25,
       reconnectionDelay: 1000
