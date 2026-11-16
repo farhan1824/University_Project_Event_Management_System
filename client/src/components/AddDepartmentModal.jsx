@@ -15,8 +15,14 @@ export const AddDepartmentModal = ({ isOpen, onClose, onSuccess }) => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    loadLeaders();
-  }, []);
+    if (isOpen) {
+      setName('');
+      setDescription('');
+      setLeaderId('');
+      setColorCode(PALETTE[0]);
+      loadLeaders();
+    }
+  }, [isOpen]);
 
   const loadLeaders = async () => {
     try {
@@ -46,6 +52,9 @@ export const AddDepartmentModal = ({ isOpen, onClose, onSuccess }) => {
       });
 
       if (res.data.success) {
+        setName('');
+        setDescription('');
+        setLeaderId('');
         refreshEventData();
         onClose();
         if (onSuccess) onSuccess();

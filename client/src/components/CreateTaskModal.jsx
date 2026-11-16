@@ -35,6 +35,17 @@ export const CreateTaskModal = ({ isOpen, onClose, defaultDepartmentId, onSucces
     return [];
   }, [currentEventData?.departments, user]);
 
+  // Reset form fields whenever the modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setTitle('');
+      setDescription('');
+      setAssignedTo('');
+      setPriority('HIGH');
+      setDeadlineHours('4');
+    }
+  }, [isOpen]);
+
   // When defaultDepartmentId changes or modal opens, pick appropriate department
   useEffect(() => {
     if (defaultDepartmentId) {
@@ -88,6 +99,9 @@ export const CreateTaskModal = ({ isOpen, onClose, defaultDepartmentId, onSucces
       });
 
       if (res.data.success) {
+        setTitle('');
+        setDescription('');
+        setAssignedTo('');
         if (socket) {
           socket.emit('broadcast_task_update', {
             eventId: selectedEventId,

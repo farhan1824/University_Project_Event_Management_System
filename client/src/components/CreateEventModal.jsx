@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { eventAPI } from '../services/api';
 import { useEvent } from '../context/EventContext';
 import { Calendar, MapPin, X, Plus, Sparkles } from 'lucide-react';
@@ -9,6 +9,14 @@ export const CreateEventModal = ({ isOpen, onClose }) => {
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setName('');
+      setDescription('');
+      setLocation('');
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -27,6 +35,9 @@ export const CreateEventModal = ({ isOpen, onClose }) => {
       });
 
       if (res.data.success) {
+        setName('');
+        setDescription('');
+        setLocation('');
         await loadEvents();
         switchEvent(res.data.data.id);
         onClose();
